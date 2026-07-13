@@ -59,11 +59,10 @@ html, body {
   display: block;
   cursor: pointer;
 
-  /* Glow */
+  /* Dark drop shadow for depth, no cyan glow */
   box-shadow:
-    0 0  50px rgba(0, 198, 198, 0.30),
-    0 0 100px rgba(0, 198, 198, 0.12),
-    0 40px 80px rgba(0, 0,   0,   0.55);
+    0 15px 35px rgba(0, 0, 0, 0.45),
+    0 30px 60px rgba(0, 0, 0, 0.35);
 
   /* Float animation */
   animation: floatBall 4s ease-in-out infinite;
@@ -74,18 +73,18 @@ html, body {
 
 .ball-img:hover {
   box-shadow:
-    0 0  70px rgba(0, 198, 198, 0.55),
-    0 0 140px rgba(0, 198, 198, 0.22),
-    0 40px 90px rgba(0, 0,   0,   0.60);
+    0 20px 45px rgba(0, 0, 0, 0.55),
+    0 35px 75px rgba(0, 0, 0, 0.45);
 }
 
 /* Soft ground shadow that mirrors the float */
 .ball-shadow {
-  width: 55%;
-  height: 22px;
+  width: 50%;
+  height: 16px;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(0,198,198,0.18) 0%, transparent 70%);
-  margin-top: 12px;
+  /* Very subtle dark base with a faint cyan glow center */
+  background: radial-gradient(ellipse, rgba(0, 198, 198, 0.12) 0%, rgba(0, 0, 0, 0.5) 35%, transparent 70%);
+  margin-top: 15px;
   animation: shadowPulse 4s ease-in-out infinite;
   pointer-events: none;
 }
@@ -186,8 +185,8 @@ html, body {
 }
 
 @keyframes shadowPulse {
-  0%, 100% { transform: scaleX(1);    opacity: 0.9; }
-  50%       { transform: scaleX(0.72); opacity: 0.4; }
+  0%, 100% { transform: scaleX(1);    opacity: 0.65; }
+  50%       { transform: scaleX(0.82); opacity: 0.25; }
 }
 
 @keyframes fadeUp {
