@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Injective World Cup – Home</title>
+  <meta name="description" content="Live World Cup scores, on-chain prediction markets, and fan experiences powered by Injective Protocol." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+</head>
+<body>
+
+  <!-- Layer 0: Water-flow background -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Layer 1: Three.js ball (transparent bg) -->
+  <canvas id="ballCanvas"></canvas>
+
+  <!-- Layer 2: UI overlay -->
+  <div class="overlay" id="overlay">
+    <p class="eyebrow">Injective Protocol × FIFA World Cup 2026</p>
+    <h1 class="hero-title">Predict.<br>Bet.<br>Win.</h1>
+    <p class="hero-sub">Live scores · On-chain markets · Fan rewards</p>
+    <div class="cta-group">
+      <a href="livescore.html" class="btn btn-primary" id="btn-live">Live Scores</a>
+      <a href="markets.html"   class="btn btn-secondary" id="btn-predict">Predict &amp; Win</a>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

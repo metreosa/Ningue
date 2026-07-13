@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg:           #18181c;
+  --bg-mid:       #1e1e24;
+  --line-color:   rgba(220, 222, 235, 0.055);
+  --text-primary: #f0f0f5;
+  --text-muted:   #9090a8;
+  --accent:       #00c6c6;   /* Injective cyan */
+  --accent-glow:  rgba(0, 198, 198, 0.35);
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+/* ─── Layer 0 — water-flow bg canvas ─────────────────────── */
+#bgCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── Layer 1 — Three.js ball canvas ─────────────────────── */
+#ballCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none; /* raycasting handled in JS */
+}
+
+/* ─── Layer 2 — UI Overlay ────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 8vw;
+  pointer-events: none;
+  user-select: none;
+  gap: 1.1rem;
+}
+
+/* small label above title */
+.eyebrow {
+  font-size: clamp(0.65rem, 1.1vw, 0.8rem);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0;
+  animation: fadeUp 0.9s 2.2s ease forwards;
+}
+
+/* main heading */
+.hero-title {
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  font-weight: 900;
+  line-height: 0.93;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  opacity: 0;
+  animation: fadeUp 1s 2.4s ease forwards;
+}
+
+/* subtitle */
+.hero-sub {
+  font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: fadeUp 0.9s 2.7s ease forwards;
+}
+
+/* CTA buttons */
+.cta-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  pointer-events: all;
+  opacity: 0;
+  animation: fadeUp 0.9s 3s ease forwards;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.7rem 1.9rem;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.btn:hover { transform: translateY(-3px); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #111;
+  box-shadow: 0 0 28px var(--accent-glow);
+}
+.btn-primary:hover {
+  box-shadow: 0 0 44px var(--accent-glow);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid rgba(220, 220, 235, 0.25);
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  background: rgba(0, 198, 198, 0.08);
+}
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
