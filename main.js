@@ -6,45 +6,6 @@
  * 3. White background removal from ball image (canvas pixel processing)
  */
 
-// ═══════════════════════════════════════════════════════════
-//  WHITE BACKGROUND REMOVAL
-// ═══════════════════════════════════════════════════════════
-/**
- * Removes white/near-white pixels from an <img> element.
- * Uses brightness + saturation thresholds so ball colours are untouched.
- * Replaces the img src with a processed blob URL.
- */
-function removeBallBg(imgEl) {
-  const off = document.createElement('canvas');
-  const ctx = off.getContext('2d');
-  off.width  = imgEl.naturalWidth;
-  off.height = imgEl.naturalHeight;
-  ctx.drawImage(imgEl, 0, 0);
-
-  const imgData = ctx.getImageData(0, 0, off.width, off.height);
-  const d = imgData.data;
-
-  for (let i = 0; i < d.length; i += 4) {
-    const r = d[i], g = d[i + 1], b = d[i + 2];
-
-    const brightness  = (r + g + b) / 3;
-    const saturation  = Math.max(r, g, b) - Math.min(r, g, b);
-
-    // White/light-grey detection: bright AND desaturated
-    if (brightness > 205 && saturation < 45) {
-      // Soft fade — fully transparent for pure white, partial for near-white
-      const alpha = Math.max(0, 1 - (brightness - 205) / 50);
-      d[i + 3] = Math.round(alpha * 255);
-    }
-  }
-
-  ctx.putImageData(imgData, 0, 0);
-
-  // Replace img src with processed transparent version
-  off.toBlob(blob => {
-    imgEl.src = URL.createObjectURL(blob);
-  }, 'image/png');
-}
 
 (() => {
 
@@ -112,13 +73,6 @@ function removeBallBg(imgEl) {
   // ═══════════════════════════════════════════════════════════
   const ballWrap = document.getElementById('ballWrap');
   const ballImg  = document.getElementById('ballImg');
-
-  // Strip white background as soon as the image is available
-  if (ballImg.complete && ballImg.naturalWidth > 0) {
-    removeBallBg(ballImg);
-  } else {
-    ballImg.addEventListener('load', () => removeBallBg(ballImg), { once: true });
-  }
 
   // Current and target tilt angles
   let tiltX = 0, tiltY = 0;
