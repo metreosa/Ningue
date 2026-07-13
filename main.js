@@ -123,42 +123,46 @@
   // ─── TEXTURES ────────────────────────────────────────────────────
   const texLoader = new THREE.TextureLoader();
 
-  // tex1 = default (World Cup Trionda)
-  const wcTexture  = texLoader.load('assets/wc_ball.png');
-  // tex2 = revealed on hover (Injective cyan/black)
-  const injTexture = texLoader.load('assets/inj_ball.png');
+  // tex1 = default (World Cup ball — user's original image)
+  const wcTexture  = texLoader.load('assets/wc_ball.jpg');
+  // tex2 = revealed on hover (Injective cyan/black — user's original image)
+  const injTexture = texLoader.load('assets/inj_ball.jpg');
 
   // ─── GLSL SHADERS ────────────────────────────────────────────────
   const vertexShader = /* glsl */`
     varying vec2 vUv;
+    varying vec3 vLocalPos;   // normalised position on unit sphere
     void main() {
-      vUv = uv;
+      vUv       = uv;
+      vLocalPos = normalize(position); // same space as hoverPoint
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `;
 
   const fragmentShader = /* glsl */`
-    uniform sampler2D tex1;         // default (WC ball)
-    uniform sampler2D tex2;         // hover reveal (INJ ball)
-    uniform vec2      hoverUV;      // UV hit-point of cursor on sphere
-    uniform float     revealRadius; // radius of the reveal circle in UV space
+    uniform sampler2D tex1;           // default (WC ball)
+    uniform sampler2D tex2;           // hover reveal (INJ ball)
+    uniform vec3      hoverPoint;     // normalised 3-D hit point in object space
+    uniform float     revealRadius;   // angular radius in radians
     uniform float     revealStrength; // 0 → 1, lerped on/off
 
     varying vec2 vUv;
+    varying vec3 vLocalPos;
 
     void main() {
       vec4 c1 = texture2D(tex1, vUv);
       vec4 c2 = texture2D(tex2, vUv);
 
-      float dist  = distance(vUv, hoverUV);
+      // Angular distance on the sphere — NO UV seam, NO straight-line cuts
+      float cosA  = dot(normalize(vLocalPos), hoverPoint);
+      float angle = acos(clamp(cosA, -1.0, 1.0));
 
-      // Soft edge: 1.0 inside the circle, 0.0 outside
-      float inner = revealRadius * 0.55;
-      float edge  = 1.0 - smoothstep(inner, revealRadius, dist);
-
+      // Soft circular edge
+      float inner  = revealRadius * 0.55;
+      float edge   = 1.0 - smoothstep(inner, revealRadius, angle);
       float reveal = edge * revealStrength;
 
-      // Blend: inside circle → INJ texture, outside → WC texture
+      // Inside circle → INJ texture, outside → WC texture
       gl_FragColor = mix(c1, c2, reveal);
     }
   `;
@@ -170,8 +174,8 @@
     uniforms: {
       tex1:          { value: wcTexture  },
       tex2:          { value: injTexture },
-      hoverUV:       { value: new THREE.Vector2(0.5, 0.5) },
-      revealRadius:  { value: 0.22 },
+      hoverPoint:    { value: new THREE.Vector3(0, 1, 0) }, // 3-D object-space hit
+      revealRadius:  { value: 0.52 },  // ~30° angular radius
       revealStrength:{ value: 0.0  },
     },
     vertexShader,
@@ -212,8 +216,10 @@
     if (hits.length > 0) {
       isOnBall     = true;
       targetReveal = 1;
-      const uv = hits[0].uv;
-      ballMat.uniforms.hoverUV.value.set(uv.x, uv.y);
+      // Convert world-space hit to normalised object-space direction
+      // This matches vLocalPos = normalize(position) in the vertex shader
+      const localHit = ball.worldToLocal(hits[0].point.clone()).normalize();
+      ballMat.uniforms.hoverPoint.value.copy(localHit);
     } else {
       isOnBall     = false;
       targetReveal = 0;
