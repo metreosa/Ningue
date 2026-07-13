@@ -145,6 +145,7 @@
     uniform vec3      hoverPoint;     // normalised 3-D hit point in object space
     uniform float     revealRadius;   // angular radius in radians
     uniform float     revealStrength; // 0 → 1, lerped on/off
+    uniform float     uTime;          // elapsed seconds for organic edge wobble
 
     varying vec2 vUv;
     varying vec3 vLocalPos;
@@ -153,16 +154,25 @@
       vec4 c1 = texture2D(tex1, vUv);
       vec4 c2 = texture2D(tex2, vUv);
 
-      // Angular distance on the sphere — NO UV seam, NO straight-line cuts
+      // Angular distance on the sphere — no UV seam, no straight-line cuts
       float cosA  = dot(normalize(vLocalPos), hoverPoint);
       float angle = acos(clamp(cosA, -1.0, 1.0));
 
-      // Soft circular edge
-      float inner  = revealRadius * 0.55;
-      float edge   = 1.0 - smoothstep(inner, revealRadius, angle);
+      // Organic wobble on the reveal edge — makes it feel liquid, not geometric
+      // The sine uses the fragment's own angle around the hit point for variation
+      vec3 cross1 = cross(normalize(vLocalPos), hoverPoint);
+      float edgeAngle = atan(cross1.y, cross1.x); // angle around the circle
+      float wobble = sin(edgeAngle * 5.0 + uTime * 1.8) * 0.045
+                   + sin(edgeAngle * 9.0 - uTime * 2.5) * 0.02;
+      float dynRadius = revealRadius + wobble * revealStrength;
+
+      // Wide, soft smoothstep transition zone (feels like flowing paint)
+      float inner = dynRadius * 0.25;
+      float outer = dynRadius * 1.15;
+      float edge  = 1.0 - smoothstep(inner, outer, angle);
+
       float reveal = edge * revealStrength;
 
-      // Inside circle → INJ texture, outside → WC texture
       gl_FragColor = mix(c1, c2, reveal);
     }
   `;
@@ -174,9 +184,10 @@
     uniforms: {
       tex1:          { value: wcTexture  },
       tex2:          { value: injTexture },
-      hoverPoint:    { value: new THREE.Vector3(0, 1, 0) }, // 3-D object-space hit
-      revealRadius:  { value: 0.52 },  // ~30° angular radius
+      hoverPoint:    { value: new THREE.Vector3(0, 1, 0) },
+      revealRadius:  { value: 0.55 },  // ~32° angular radius
       revealStrength:{ value: 0.0  },
+      uTime:         { value: 0.0  },
     },
     vertexShader,
     fragmentShader,
@@ -268,9 +279,10 @@
     // Subtle gentle tilt bob
     ball.rotation.x = Math.sin(elapsed * 0.35) * 0.04;
 
-    // ── Smooth reveal strength lerp ───────────────────────────────
-    currentReveal += (targetReveal - currentReveal) * (delta * 9);
+    // ── Smooth reveal strength lerp (slower = more fluid feel) ─────
+    currentReveal += (targetReveal - currentReveal) * (delta * 4.5);
     ballMat.uniforms.revealStrength.value = currentReveal;
+    ballMat.uniforms.uTime.value = elapsed;
 
     // ── Draw background ───────────────────────────────────────────
     drawBackground(elapsed);
