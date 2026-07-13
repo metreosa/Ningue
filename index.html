@@ -4,23 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Injective World Cup – Home</title>
-  <meta name="description" content="Live World Cup scores, on-chain prediction markets, and fan experiences powered by Injective Protocol." />
+  <meta name="description" content="Live World Cup scores, on-chain prediction markets, powered by Injective Protocol." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 </head>
 <body>
 
-  <!-- Layer 0: Water-flow background -->
+  <!-- Layer 0: water-flow background -->
   <canvas id="bgCanvas"></canvas>
 
-  <!-- Layer 1: Three.js ball (transparent bg) -->
-  <canvas id="ballCanvas"></canvas>
+  <!-- Layer 1: floating ball -->
+  <div class="ball-wrap" id="ballWrap">
+    <img src="ball.jpeg" alt="Injective Ball" class="ball-img" id="ballImg" />
+    <div class="ball-shadow"></div>
+  </div>
 
-  <!-- Layer 2: UI overlay -->
-  <div class="overlay" id="overlay">
+  <!-- Layer 2: text overlay -->
+  <div class="overlay">
     <p class="eyebrow">Injective Protocol × FIFA World Cup 2026</p>
     <h1 class="hero-title">Predict.<br>Bet.<br>Win.</h1>
     <p class="hero-sub">Live scores · On-chain markets · Fan rewards</p>
