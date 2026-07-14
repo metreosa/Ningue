@@ -4,20 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Injective World Cup – Home</title>
-  <meta name="description" content="Live World Cup scores, on-chain prediction markets, powered by Injective Protocol." />
+  <meta name="description" content="Live World Cup scores, on-chain prediction markets, fan rewards — powered by Injective Protocol." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* Home-specific: hide the shared.css body background so style.css dark bg shows */
+    .nav { background: rgba(12,12,18,0.75); }
+  </style>
 </head>
 <body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">
+      <span class="brand-icon">⚽</span>
+      <span>INJ<span class="accent">Cup</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="livescores.html" class="nav-link">Live Scores</a>
+      <a href="markets.html"    class="nav-link">Markets</a>
+      <a href="games.html"      class="nav-link">Games</a>
+    </div>
+    <div class="nav-right">
+      <button class="btn-wallet" id="walletBtn">Connect Wallet</button>
+    </div>
+  </nav>
 
   <!-- Layer 0: water-flow background -->
   <canvas id="bgCanvas"></canvas>
 
   <!-- Layer 1: floating ball -->
   <div class="ball-wrap" id="ballWrap">
-    <img src="assets/inj_ball_clean.png?v=2" alt="Injective Ball" class="ball-img" id="ballImg" />
+    <img src="assets/inj_ball_clean.png?v=3" alt="Injective Ball" class="ball-img" id="ballImg" />
     <div class="ball-shadow"></div>
   </div>
 
@@ -27,11 +48,15 @@
     <h1 class="hero-title">Predict.<br>Bet.<br>Win.</h1>
     <p class="hero-sub">Live scores · On-chain markets · Fan rewards</p>
     <div class="cta-group">
-      <a href="livescore.html" class="btn btn-primary" id="btn-live">Live Scores</a>
-      <a href="markets.html"   class="btn btn-secondary" id="btn-predict">Predict &amp; Win</a>
+      <a href="livescores.html" class="btn btn-primary"   id="btn-live">Live Scores</a>
+      <a href="markets.html"    class="btn btn-secondary" id="btn-predict">Predict &amp; Win</a>
     </div>
   </div>
 
   <script src="main.js"></script>
+  <script type="module">
+    import { initNav } from './shared.js';
+    initNav();
+  </script>
 </body>
 </html>

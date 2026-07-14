@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prediction Markets — Injective World Cup</title>
+  <meta name="description" content="On-chain World Cup prediction markets powered by Injective Protocol. AI-powered match analysis via MCP Agent Skills." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <span class="brand-icon">⚽</span>
+    <span>INJ<span class="accent">Cup</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="livescores.html" class="nav-link">Live Scores</a>
+    <a href="markets.html"    class="nav-link" id="nav-markets">Markets</a>
+    <a href="games.html"      class="nav-link">Games</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-outline" id="depositBtn">Deposit USDC</button>
+    <button class="btn-wallet"  id="walletBtn">Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- x402 Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal">
+    <button class="modal-close" id="payCancelBtn">✕</button>
+    <div class="modal-title">💳 AI Analysis — Pay to Unlock</div>
+    <div class="modal-sub">Powered by Injective x402 Protocol</div>
+
+    <div class="payment-step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-text">Amount due: <strong id="payModalAmount">0.10 USDC</strong></div>
+        <div class="step-sub">One-time micropayment per analysis</div>
+      </div>
+    </div>
+    <div class="payment-step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-text">Sign with Keplr wallet</div>
+        <div class="step-sub">No subscription. No account. Pay only when you analyse.</div>
+      </div>
+    </div>
+    <div class="payment-step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-text">Get AI prediction instantly</div>
+        <div class="step-sub">Powered by MCP Agent Skills + real match data</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="payConfirmBtn">✅ Approve Payment &amp; Analyse</button>
+  </div>
+</div>
+
+<!-- CCTP Deposit Modal -->
+<div class="modal-overlay" id="depositModal">
+  <div class="modal">
+    <button class="modal-close" id="depositCloseBtn">✕</button>
+    <div class="modal-title">🌉 Deposit USDC to Injective</div>
+    <div class="modal-sub">Cross-chain via Circle CCTP — no bridges, no wrapped tokens</div>
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">SOURCE CHAIN</label>
+      <select id="cctpChain" style="width:100%;padding:0.65rem 1rem;border-radius:10px;border:1.5px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font-family:Inter,sans-serif;font-size:0.9rem;outline:none;">
+        <option value="ethereum">Ethereum</option>
+        <option value="base">Base</option>
+        <option value="arbitrum">Arbitrum</option>
+        <option value="optimism">Optimism</option>
+        <option value="avalanche">Avalanche</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">AMOUNT (USDC)</label>
+      <input type="number" id="cctpAmount" value="10" min="1" style="width:100%;padding:0.65rem 1rem;border-radius:10px;border:1.5px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font-family:Inter,sans-serif;font-size:0.9rem;outline:none;" />
+    </div>
+
+    <div class="payment-step" style="background:rgba(0,198,198,0.04);border-color:rgba(0,198,198,0.2);">
+      <div style="font-size:0.8rem;color:var(--text-muted);line-height:1.5;">
+        <strong style="color:var(--accent);">How CCTP works:</strong><br/>
+        1. USDC is burned on <span id="cctpChainName">Ethereum</span><br/>
+        2. Circle signs a cryptographic proof<br/>
+        3. Native USDC minted on Injective ✅
+      </div>
+    </div>
+
+    <div class="badge badge-open" style="margin:0.75rem 0;font-size:0.75rem;">
+      ⏱️ Typically completes in 2–5 minutes
+    </div>
+
+    <button class="btn-primary" id="cctpInitiateBtn">🔥 Initiate Deposit</button>
+    <div id="cctpStatus" style="margin-top:0.75rem;font-size:0.82rem;color:var(--text-muted);text-align:center;"></div>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="container">
+    <h1 class="page-title">Prediction Markets</h1>
+    <p class="page-sub">Place on-chain bets · AI analysis powered by MCP Agent Skills</p>
+
+    <!-- Stats bar -->
+    <div style="display:flex;gap:2rem;margin-bottom:2rem;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Total Pool</div>
+        <div style="font-size:1.4rem;font-weight:800;" id="totalPool">—</div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Open Markets</div>
+        <div style="font-size:1.4rem;font-weight:800;" id="openMarkets">—</div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Network</div>
+        <div style="font-size:1.4rem;font-weight:800;color:var(--accent)">Injective</div>
+      </div>
+    </div>
+
+    <!-- Market cards -->
+    <div class="grid-2" id="marketGrid">
+      <div style="display:flex;align-items:center;gap:0.75rem;color:var(--text-muted);font-size:0.9rem;">
+        <span class="spinner"></span> Loading markets…
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { startBackground, initNav, apiGet, apiPost, showToast, fmtDate, countdown } from './shared.js';
+
+startBackground();
+initNav();
+
+// ── Load markets ──────────────────────────────────────────────────────────────
+async function loadMarkets() {
+  try {
+    const data = await apiGet('/api/markets');
+    renderMarkets(data.markets || []);
+  } catch {
+    document.getElementById('marketGrid').innerHTML =
+      `<div class="card" style="color:var(--text-muted);">⚠️ Could not connect to server. Run <code>npm run server</code>.</div>`;
+  }
+}
+
+// ── Render market cards ───────────────────────────────────────────────────────
+function renderMarkets(markets) {
+  const grid = document.getElementById('marketGrid');
+
+  // Stats
+  const totalUSDC = markets.reduce((s, m) => {
+    const n = parseFloat((m.totalPool || '0').replace(/,/g, ''));
+    return s + (isNaN(n) ? 0 : n);
+  }, 0);
+  document.getElementById('totalPool').textContent =
+    '$' + totalUSDC.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' USDC';
+  document.getElementById('openMarkets').textContent =
+    markets.filter(m => m.status !== 'CLOSED').length;
+
+  grid.innerHTML = markets.map((m, i) => {
+    const isLive = m.status === 'LIVE';
+    return `
+    <div class="card">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+        <div>
+          <span class="badge ${isLive ? 'badge-live' : 'badge-open'}" style="margin-bottom:0.4rem;">
+            ${isLive ? '🔴 LIVE' : '⏰ OPEN'}
+          </span>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">
+            Pool: <strong style="color:var(--accent)">${m.totalPool}</strong>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.72rem;color:var(--text-muted);">Closes in</div>
+          <div class="countdown" id="cd_${m.id}" style="font-size:0.82rem;color:var(--text);font-weight:600;"></div>
+        </div>
+      </div>
+
+      <!-- Teams -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="font-size:1rem;font-weight:700;">${m.homeTeam}</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);">vs</div>
+        <div style="font-size:1rem;font-weight:700;">${m.awayTeam}</div>
+      </div>
+
+      <!-- Odds buttons -->
+      <div class="odds-row">
+        <button class="odds-btn" data-market="${m.id}" data-pick="home"
+          onclick="selectOdds('${m.id}','home',this)">
+          <span class="odds-label">1 – ${m.homeTeam.split(' ')[0]}</span>
+          <span class="odds-value">${m.odds.home}x</span>
+        </button>
+        <button class="odds-btn" data-market="${m.id}" data-pick="draw"
+          onclick="selectOdds('${m.id}','draw',this)">
+          <span class="odds-label">Draw</span>
+          <span class="odds-value">${m.odds.draw}x</span>
+        </button>
+        <button class="odds-btn" data-market="${m.id}" data-pick="away"
+          onclick="selectOdds('${m.id}','away',this)">
+          <span class="odds-label">2 – ${m.awayTeam.split(' ')[0]}</span>
+          <span class="odds-value">${m.odds.away}x</span>
+        </button>
+      </div>
+
+      <!-- Bet amount + place bet -->
+      <div class="amount-row">
+        <input class="amount-input" type="number" id="amt_${m.id}" placeholder="0.00" value="10" min="0.01" step="0.01" />
+        <span class="amount-unit">USDC</span>
+      </div>
+      <button class="btn-primary" onclick="placeBet('${m.id}','${m.homeTeam}','${m.awayTeam}')">
+        Place Bet on Injective
+      </button>
+
+      <!-- AI Analyse -->
+      <button class="btn-outline" style="width:100%;margin-top:0.6rem;"
+        onclick="analyseMatch('${m.matchId}','${m.id}')">
+        🤖 AI Analyse — 0.10 USDC
+      </button>
+
+      <!-- Analysis panel (hidden until analysis is done) -->
+      <div class="analysis-panel" id="ap_${m.id}"></div>
+    </div>`;
+  }).join('');
+
+  // Start countdowns
+  markets.forEach(m => {
+    const el = document.getElementById('cd_' + m.id);
+    if (el && m.endsAt) countdown(m.endsAt, el);
+  });
+}
+
+// ── Odds selection state ──────────────────────────────────────────────────────
+const selections = {};
+
+window.selectOdds = function(marketId, pick, btn) {
+  // Deselect other buttons in this market
+  document.querySelectorAll(`[data-market="${marketId}"]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selections[marketId] = pick;
+};
+
+// ── Place bet ─────────────────────────────────────────────────────────────────
+window.placeBet = async function(marketId, home, away) {
+  const pick   = selections[marketId];
+  const amount = document.getElementById('amt_' + marketId)?.value;
+
+  if (!pick)   return showToast('⚠️ Select a bet first (Home / Draw / Away)');
+  if (!amount) return showToast('⚠️ Enter a bet amount');
+
+  showToast(`📝 Placing ${amount} USDC bet on ${pick === 'home' ? home : pick === 'away' ? away : 'Draw'}…`);
+
+  // In production: call Injective SDK to place bet on-chain
+  // window.keplr → sign MsgExecuteContract on prediction market
+  setTimeout(() => showToast('✅ Bet placed on Injective! Tx confirmed.'), 2000);
+};
+
+// ── AI Analysis (x402 protected) ──────────────────────────────────────────────
+window.analyseMatch = async function(matchId, marketId) {
+  const panel = document.getElementById('ap_' + marketId);
+  panel.classList.add('visible');
+  panel.innerHTML = `<div style="display:flex;align-items:center;gap:0.75rem;color:var(--text-muted);font-size:0.85rem;">
+    <span class="spinner"></span> Requesting analysis… (x402 payment flow)
+  </div>`;
+
+  try {
+    const result = await apiPost('/api/analyse', { matchId });
+    renderAnalysis(panel, result.analysis);
+  } catch (err) {
+    panel.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;">
+      ❌ ${err.message || 'Analysis failed. Is the server running?'}
+    </div>`;
+  }
+};
+
+function renderAnalysis(panel, a) {
+  if (!a) { panel.innerHTML = '<div style="color:var(--text-muted);">No analysis returned.</div>'; return; }
+
+  const confidence = a.prediction?.confidence || 60;
+  const winner     = a.prediction?.winner || '—';
+  const score      = a.prediction?.score  || '—';
+
+  panel.innerHTML = `
+    <div class="analysis-header">🤖 AI Analysis <span style="opacity:.5;font-weight:400;margin-left:0.5rem;">MCP Agent Skills + Injective Market Data</span></div>
+    <div class="analysis-prediction">
+      <div class="pred-winner">${winner}</div>
+      <div class="pred-score">${score}</div>
+      <div class="confidence-pill">${confidence}% confidence</div>
+    </div>
+    <div class="stat-bar-wrap">
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${confidence}%"></div></div>
+    </div>
+    <div class="analysis-summary" style="margin-top:0.85rem;">${a.summary || ''}</div>
+    ${a.keyFactors?.length ? `
+    <ul class="factor-list" style="margin-top:0.75rem;">
+      ${a.keyFactors.map(f => `<li class="factor-item">${f}</li>`).join('')}
+    </ul>` : ''}
+    ${a.marketInsight ? `
+    <div style="margin-top:0.75rem;padding:0.75rem;border-radius:10px;background:rgba(0,198,198,0.05);border:1px solid rgba(0,198,198,0.12);font-size:0.8rem;color:var(--text-muted);">
+      <strong style="color:var(--accent);">📊 Market Insight</strong><br/>${a.marketInsight}
+    </div>` : ''}
+    <div style="margin-top:0.75rem;font-size:0.7rem;color:rgba(255,255,255,0.3);">
+      Risk: ${a.riskLevel || '—'} · Paid via x402 on Injective · Data from MCP tools
+    </div>
+  `;
+}
+
+// ── CCTP Deposit flow ─────────────────────────────────────────────────────────
+document.getElementById('depositBtn').addEventListener('click', () => {
+  document.getElementById('depositModal').classList.add('open');
+});
+document.getElementById('depositCloseBtn').addEventListener('click', () => {
+  document.getElementById('depositModal').classList.remove('open');
+});
+document.getElementById('cctpChain').addEventListener('change', function() {
+  document.getElementById('cctpChainName').textContent =
+    this.options[this.selectedIndex].text;
+});
+
+document.getElementById('cctpInitiateBtn').addEventListener('click', async () => {
+  const chain  = document.getElementById('cctpChain').value;
+  const amount = document.getElementById('cctpAmount').value;
+  const status = document.getElementById('cctpStatus');
+
+  status.textContent = '⏳ Fetching burn parameters from server…';
+
+  try {
+    const { burnParams } = await fetch('http://localhost:3001/api/cctp/burn-params', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sourceChain: chain, amount, recipient: 'inj1demo_recipient' })
+    }).then(r => r.json());
+
+    status.innerHTML = `
+      ✅ <strong>Burn params ready.</strong><br/>
+      <span style="font-size:0.75rem;opacity:0.6;">
+        Contract: ${burnParams.messenger?.slice(0,10)}…<br/>
+        Amount: ${amount} USDC → Injective<br/>
+        Domain: ${burnParams.destinationDomain}
+      </span><br/><br/>
+      <em style="font-size:0.75rem;">In production: MetaMask signs the burn tx on ${burnParams.sourceChain}, 
+      then Circle attests, then native USDC mints on Injective.</em>
+    `;
+  } catch {
+    status.textContent = '❌ Server not running. Start with: npm run server';
+  }
+});
+
+loadMarkets();
+</script>
+</body>
+</html>

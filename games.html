@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games — Injective World Cup</title>
+  <meta name="description" content="World Cup betting mini-games — Score Predictor, Golden Boot, and Bracket Builder on Injective." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 1.25rem; }
+
+    /* Score predictor */
+    .score-picker { display: flex; align-items: center; gap: 1rem; justify-content: center; margin: 1rem 0; }
+    .score-num-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+    .score-team-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .score-stepper { display: flex; align-items: center; gap: 0.5rem; }
+    .step-btn { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: rgba(255,255,255,0.04); color: var(--text); font-size: 1.1rem; cursor: pointer; transition: all 0.2s; font-family: Inter, sans-serif; }
+    .step-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .score-display { font-size: 2rem; font-weight: 900; width: 2.5rem; text-align: center; }
+    .vs-sep { font-size: 1.4rem; color: var(--text-muted); font-weight: 300; padding: 0 0.5rem; }
+
+    /* Bracket */
+    .team-pick-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0; }
+    .team-pick-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.9rem; border-radius: 10px; border: 1.5px solid var(--border); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.2s; font-size: 0.875rem; }
+    .team-pick-item:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .team-pick-item.picked { border-color: var(--accent); background: rgba(0,198,198,0.12); }
+    .pick-flag { font-size: 1.4rem; }
+
+    /* Golden boot */
+    .player-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.75rem 0; }
+    .player-card { padding: 0.65rem 0.8rem; border-radius: 10px; border: 1.5px solid var(--border); background: rgba(255,255,255,0.03); cursor: pointer; transition: all 0.2s; }
+    .player-card:hover { border-color: var(--accent); }
+    .player-card.picked { border-color: var(--accent); background: var(--accent-dim); }
+    .player-name { font-size: 0.85rem; font-weight: 700; }
+    .player-team { font-size: 0.72rem; color: var(--text-muted); }
+    .player-goals { font-size: 0.72rem; color: var(--accent); font-weight: 600; }
+
+    /* Leaderboard */
+    .lb-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .lb-rank { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); width: 1.5rem; text-align: center; }
+    .lb-rank.gold   { color: #ffd060; }
+    .lb-rank.silver { color: #c0c0d0; }
+    .lb-rank.bronze { color: #cd7f32; }
+    .lb-addr { font-family: monospace; font-size: 0.78rem; color: var(--text-muted); flex: 1; }
+    .lb-pts  { font-weight: 700; color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <span class="brand-icon">⚽</span>
+    <span>INJ<span class="accent">Cup</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="livescores.html" class="nav-link">Live Scores</a>
+    <a href="markets.html"    class="nav-link">Markets</a>
+    <a href="games.html"      class="nav-link" id="nav-games">Games</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-wallet" id="walletBtn">Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="container">
+    <h1 class="page-title">Games</h1>
+    <p class="page-sub">Win USDC · All games run on Injective · Prizes paid on-chain</p>
+
+    <div class="game-grid">
+
+      <!-- ── Game 1: Score Predictor ─────────────────────────────────────── -->
+      <div class="game-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="game-icon">🎯</div>
+          <span class="badge badge-live">LIVE ROUND</span>
+        </div>
+        <div class="game-title">Score Predictor</div>
+        <div class="game-desc">Predict the exact final score of any match. Perfect prediction earns 10x your entry fee. Nearest score earns 3x.</div>
+
+        <!-- Match picker -->
+        <div style="margin-top:0.5rem;">
+          <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Choose Match</div>
+          <select id="scoreMatchPick" style="width:100%;padding:0.55rem 0.9rem;border-radius:10px;border:1.5px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font-family:Inter,sans-serif;font-size:0.85rem;outline:none;">
+            <option value="m001">🇧🇷 Brazil vs Argentina 🇦🇷  (LIVE)</option>
+            <option value="m002">🇫🇷 France vs Germany 🇩🇪  (LIVE)</option>
+            <option value="m003">🇪🇸 Spain vs England 🏴󠁧󠁢󠁥󠁮󠁧󠁿  (Upcoming)</option>
+            <option value="m004">🇺🇸 USA vs Morocco 🇲🇦  (Upcoming)</option>
+          </select>
+        </div>
+
+        <!-- Score stepper -->
+        <div class="score-picker">
+          <div class="score-num-wrap">
+            <div class="score-team-label" id="spHomeLabel">Brazil</div>
+            <div class="score-stepper">
+              <button class="step-btn" onclick="changeScore('home',-1)">−</button>
+              <div class="score-display" id="spHome">1</div>
+              <button class="step-btn" onclick="changeScore('home',+1)">+</button>
+            </div>
+          </div>
+          <div class="vs-sep">–</div>
+          <div class="score-num-wrap">
+            <div class="score-team-label" id="spAwayLabel">Argentina</div>
+            <div class="score-stepper">
+              <button class="step-btn" onclick="changeScore('away',-1)">−</button>
+              <div class="score-display" id="spAway">0</div>
+              <button class="step-btn" onclick="changeScore('away',+1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="amount-row">
+          <input class="amount-input" type="number" id="scoreAmt" value="5" min="1" step="1" />
+          <span class="amount-unit">USDC entry</span>
+        </div>
+
+        <div class="game-prize">🏆 Prize pool: <strong>2,400 USDC</strong> · 47 entries</div>
+
+        <button class="btn-primary" onclick="submitScorePred()">Submit Prediction on Injective</button>
+      </div>
+
+      <!-- ── Game 2: Golden Boot ─────────────────────────────────────────── -->
+      <div class="game-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="game-icon">👟</div>
+          <span class="badge badge-open">TOURNAMENT</span>
+        </div>
+        <div class="game-title">Golden Boot Race</div>
+        <div class="game-desc">Pick the top goalscorer of the tournament. Entry is 5 USDC. Winner takes 80% of the prize pool.</div>
+
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.5rem;margin-bottom:0.35rem;">Current Scorers</div>
+
+        <div class="player-grid">
+          <div class="player-card" onclick="pickPlayer(this,'Vinicius Jr.')">
+            <div class="player-name">Vinicius Jr.</div>
+            <div class="player-team">🇧🇷 Brazil</div>
+            <div class="player-goals">⚽ 6 goals</div>
+          </div>
+          <div class="player-card" onclick="pickPlayer(this,'Mbappé')">
+            <div class="player-name">Mbappé</div>
+            <div class="player-team">🇫🇷 France</div>
+            <div class="player-goals">⚽ 5 goals</div>
+          </div>
+          <div class="player-card" onclick="pickPlayer(this,'Messi')">
+            <div class="player-name">Messi</div>
+            <div class="player-team">🇦🇷 Argentina</div>
+            <div class="player-goals">⚽ 5 goals</div>
+          </div>
+          <div class="player-card" onclick="pickPlayer(this,'Wirtz')">
+            <div class="player-name">Florian Wirtz</div>
+            <div class="player-team">🇩🇪 Germany</div>
+            <div class="player-goals">⚽ 4 goals</div>
+          </div>
+          <div class="player-card" onclick="pickPlayer(this,'Yamal')">
+            <div class="player-name">Lamine Yamal</div>
+            <div class="player-team">🇪🇸 Spain</div>
+            <div class="player-goals">⚽ 4 goals</div>
+          </div>
+          <div class="player-card" onclick="pickPlayer(this,'Pulisic')">
+            <div class="player-name">Christian Pulisic</div>
+            <div class="player-team">🇺🇸 USA</div>
+            <div class="player-goals">⚽ 3 goals</div>
+          </div>
+        </div>
+
+        <div id="goldenPickDisplay" style="font-size:0.82rem;color:var(--text-muted);margin-top:0.25rem;min-height:1.2rem;"></div>
+        <div class="game-prize">🏆 Prize pool: <strong>3,750 USDC</strong> · 75 entries</div>
+        <button class="btn-primary" onclick="submitGoldenBoot()">Enter Golden Boot — 5 USDC</button>
+      </div>
+
+      <!-- ── Game 3: Bracket Builder ─────────────────────────────────────── -->
+      <div class="game-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="game-icon">🏆</div>
+          <span class="badge badge-open">SEMI-FINALS</span>
+        </div>
+        <div class="game-title">Bracket Builder</div>
+        <div class="game-desc">Pick the Semi-Final winners and the tournament champion. Entry is 10 USDC. Each correct pick earns multiplied rewards.</div>
+
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.5rem;margin-bottom:0.35rem;">Pick Semi-Final Winner: Brazil vs Argentina</div>
+        <div class="team-pick-list" id="sfPick1">
+          <div class="team-pick-item" onclick="pickTeam('sf1','Brazil',this)"><span class="pick-flag">🇧🇷</span> Brazil</div>
+          <div class="team-pick-item" onclick="pickTeam('sf1','Argentina',this)"><span class="pick-flag">🇦🇷</span> Argentina</div>
+        </div>
+
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.75rem;margin-bottom:0.35rem;">Pick Semi-Final Winner: France vs Germany</div>
+        <div class="team-pick-list" id="sfPick2">
+          <div class="team-pick-item" onclick="pickTeam('sf2','France',this)"><span class="pick-flag">🇫🇷</span> France</div>
+          <div class="team-pick-item" onclick="pickTeam('sf2','Germany',this)"><span class="pick-flag">🇩🇪</span> Germany</div>
+        </div>
+
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.75rem;margin-bottom:0.35rem;">Pick Tournament Champion</div>
+        <div class="team-pick-list" id="champPick">
+          <div class="team-pick-item" onclick="pickTeam('champ','Brazil',this)"><span class="pick-flag">🇧🇷</span> Brazil</div>
+          <div class="team-pick-item" onclick="pickTeam('champ','France',this)"><span class="pick-flag">🇫🇷</span> France</div>
+          <div class="team-pick-item" onclick="pickTeam('champ','Argentina',this)"><span class="pick-flag">🇦🇷</span> Argentina</div>
+          <div class="team-pick-item" onclick="pickTeam('champ','Germany',this)"><span class="pick-flag">🇩🇪</span> Germany</div>
+        </div>
+
+        <div class="game-prize">🏆 Prize pool: <strong>8,200 USDC</strong> · 82 entries</div>
+        <button class="btn-primary" onclick="submitBracket()">Submit Bracket — 10 USDC</button>
+      </div>
+
+      <!-- ── Leaderboard ─────────────────────────────────────────────────── -->
+      <div class="game-card">
+        <div class="game-icon">📊</div>
+        <div class="game-title">Leaderboard</div>
+        <div class="game-desc">Top players this tournament. Rankings update after every match.</div>
+
+        <div style="margin-top:0.75rem;">
+          <div class="lb-row">
+            <div class="lb-rank gold">🥇</div>
+            <div class="lb-addr">inj1abc…def9</div>
+            <div style="flex:1;font-size:0.72rem;color:var(--text-muted);">Score Predictor</div>
+            <div class="lb-pts">420 pts</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank silver">🥈</div>
+            <div class="lb-addr">inj1xyz…7f3a</div>
+            <div style="flex:1;font-size:0.72rem;color:var(--text-muted);">Golden Boot</div>
+            <div class="lb-pts">380 pts</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank bronze">🥉</div>
+            <div class="lb-addr">inj1qrs…1b2c</div>
+            <div style="flex:1;font-size:0.72rem;color:var(--text-muted);">Bracket Builder</div>
+            <div class="lb-pts">315 pts</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank" style="color:var(--text-muted);">4</div>
+            <div class="lb-addr">inj1lmn…cc01</div>
+            <div style="flex:1;font-size:0.72rem;color:var(--text-muted);">Multi-game</div>
+            <div class="lb-pts">280 pts</div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank" style="color:var(--text-muted);">5</div>
+            <div class="lb-addr">inj1pqr…88fe</div>
+            <div style="flex:1;font-size:0.72rem;color:var(--text-muted);">Score Predictor</div>
+            <div class="lb-pts">245 pts</div>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;font-size:0.72rem;color:var(--text-muted);line-height:1.5;border-top:1px solid var(--border);padding-top:0.75rem;">
+          📡 All prizes distributed automatically via Injective smart contracts.<br/>
+          No manual claim needed — USDC sent directly to winning wallet.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { startBackground, initNav, showToast, connectWallet } from './shared.js';
+
+startBackground();
+initNav();
+
+// ── Score Predictor ───────────────────────────────────────────────────────────
+const scores = { home: 1, away: 0 };
+const matchLabels = {
+  m001: { home: 'Brazil', away: 'Argentina' },
+  m002: { home: 'France', away: 'Germany'   },
+  m003: { home: 'Spain',  away: 'England'   },
+  m004: { home: 'USA',    away: 'Morocco'   },
+};
+
+document.getElementById('scoreMatchPick').addEventListener('change', function() {
+  const m = matchLabels[this.value];
+  document.getElementById('spHomeLabel').textContent = m.home;
+  document.getElementById('spAwayLabel').textContent = m.away;
+});
+
+window.changeScore = function(side, delta) {
+  scores[side] = Math.max(0, Math.min(15, scores[side] + delta));
+  document.getElementById(side === 'home' ? 'spHome' : 'spAway').textContent = scores[side];
+};
+
+window.submitScorePred = async function() {
+  const amt = document.getElementById('scoreAmt').value;
+  const matchId = document.getElementById('scoreMatchPick').value;
+  const m = matchLabels[matchId];
+  showToast(`🎯 Submitting ${scores.home}-${scores.away} for ${m.home} vs ${m.away} (${amt} USDC)…`);
+  setTimeout(() => showToast('✅ Prediction submitted on Injective!'), 1500);
+};
+
+// ── Golden Boot ───────────────────────────────────────────────────────────────
+let pickedPlayer = null;
+
+window.pickPlayer = function(el, player) {
+  document.querySelectorAll('.player-card').forEach(c => c.classList.remove('picked'));
+  el.classList.add('picked');
+  pickedPlayer = player;
+  document.getElementById('goldenPickDisplay').innerHTML =
+    `✅ Picked: <strong style="color:var(--accent)">${player}</strong>`;
+};
+
+window.submitGoldenBoot = function() {
+  if (!pickedPlayer) return showToast('⚠️ Pick a player first');
+  showToast(`👟 Entering ${pickedPlayer} for Golden Boot (5 USDC)…`);
+  setTimeout(() => showToast('✅ Golden Boot entry on Injective!'), 1500);
+};
+
+// ── Bracket Builder ───────────────────────────────────────────────────────────
+const bracketPicks = { sf1: null, sf2: null, champ: null };
+
+window.pickTeam = function(slot, team, el) {
+  el.closest(`#${slot}Pick, [id$="Pick1"], [id$="Pick2"], #champPick`)
+    ?.querySelectorAll('.team-pick-item')
+    .forEach(i => i.classList.remove('picked'));
+  el.classList.add('picked');
+  bracketPicks[slot] = team;
+};
+
+// Wire up the bracket list IDs
+window.pickTeam = function(slot, team, el) {
+  const container = document.getElementById(
+    slot === 'sf1' ? 'sfPick1' : slot === 'sf2' ? 'sfPick2' : 'champPick'
+  );
+  container?.querySelectorAll('.team-pick-item').forEach(i => i.classList.remove('picked'));
+  el.classList.add('picked');
+  bracketPicks[slot] = team;
+};
+
+window.submitBracket = function() {
+  if (!bracketPicks.sf1 || !bracketPicks.sf2 || !bracketPicks.champ) {
+    return showToast('⚠️ Complete all picks before submitting');
+  }
+  showToast(`🏆 Submitting bracket: ${bracketPicks.sf1}, ${bracketPicks.sf2}, Champion: ${bracketPicks.champ}…`);
+  setTimeout(() => showToast('✅ Bracket locked on Injective!'), 1500);
+};
+</script>
+</body>
+</html>

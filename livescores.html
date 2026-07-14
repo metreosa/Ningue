@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Scores — Injective World Cup</title>
+  <meta name="description" content="Live FIFA World Cup 2026 scores, upcoming fixtures, and previous results powered by Injective Protocol." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-brand">
+    <span class="brand-icon">⚽</span>
+    <span>INJ<span class="accent">Cup</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="livescores.html" class="nav-link" id="nav-live">Live Scores</a>
+    <a href="markets.html"    class="nav-link" id="nav-markets">Markets</a>
+    <a href="games.html"      class="nav-link" id="nav-games">Games</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-wallet" id="walletBtn">Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="container">
+    <h1 class="page-title">Live Scores</h1>
+    <p class="page-sub">FIFA World Cup 2026 — Quarter Finals</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="live">🔴 Live</button>
+      <button class="tab"        data-tab="upcoming">📅 Upcoming</button>
+      <button class="tab"        data-tab="results">🏆 Results</button>
+    </div>
+
+    <!-- Match list -->
+    <div class="match-list" id="matchList">
+      <div style="display:flex;align-items:center;gap:0.75rem;color:var(--text-muted);font-size:0.9rem;">
+        <span class="spinner"></span> Loading matches…
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { startBackground, initNav, apiGet, fmtDate, countdown, showToast } from './shared.js';
+
+startBackground();
+initNav();
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+const tabs = document.querySelectorAll('.tab');
+let activeTab = 'live';
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeTab = tab.dataset.tab;
+    loadMatches(activeTab);
+  });
+});
+
+// ── Load matches from API ─────────────────────────────────────────────────────
+async function loadMatches(status) {
+  const list = document.getElementById('matchList');
+  list.innerHTML = `<div style="display:flex;align-items:center;gap:0.75rem;color:var(--text-muted);font-size:0.9rem;">
+    <span class="spinner"></span> Loading…</div>`;
+
+  let statusParam = '';
+  if (status === 'live')     statusParam = 'LIVE';
+  if (status === 'upcoming') statusParam = 'SCHEDULED';
+  if (status === 'results')  statusParam = 'FINISHED';
+
+  try {
+    const data = await apiGet(`/api/scores?status=${statusParam}`);
+    renderMatches(data.matches || [], status);
+  } catch (err) {
+    list.innerHTML = `<div class="card" style="color:var(--text-muted);">
+      ⚠️ Could not connect to server. Make sure <code>npm run server</code> is running.</div>`;
+  }
+}
+
+// ── Render match cards ────────────────────────────────────────────────────────
+function renderMatches(matches, status) {
+  const list = document.getElementById('matchList');
+
+  if (!matches.length) {
+    list.innerHTML = `<div class="card" style="color:var(--text-muted);text-align:center;padding:2rem;">
+      No ${status} matches found.</div>`;
+    return;
+  }
+
+  list.innerHTML = matches.map(m => {
+    const isLive     = m.status === 'IN_PLAY';
+    const isFinished = m.status === 'FINISHED';
+    const isScheduled= m.status === 'SCHEDULED';
+
+    const scoreHtml = isScheduled
+      ? `<div class="score-nums">–<span class="score-sep">vs</span>–</div>`
+      : `<div class="score-nums">${m.score?.home ?? 0}<span class="score-sep">–</span>${m.score?.away ?? 0}</div>`;
+
+    const statusHtml = isLive
+      ? `<div class="score-status"><span class="live-dot"></span><span style="color:var(--red)">${m.minute}'</span></div>`
+      : isFinished
+        ? `<div class="score-status" style="color:var(--text-muted)">FT</div>`
+        : `<div class="countdown score-status" id="cd_${m.id}" style="color:var(--accent)"></div>`;
+
+    const stageBadge = m.stage?.replace(/_/g,' ').toLowerCase().replace(/\b./g,c=>c.toUpperCase()) || '';
+
+    return `
+    <div class="match-card ${isLive ? 'live' : ''}">
+      <div class="team-block">
+        <div class="team-flag">${m.homeTeam?.crest || '🏳️'}</div>
+        <div class="team-name">${m.homeTeam?.shortName || m.homeTeam?.name}</div>
+      </div>
+
+      <div class="score-block">
+        <div class="badge ${isLive ? 'badge-live' : isFinished ? 'badge-closed' : 'badge-open'}" style="margin:0 auto 0.5rem;">
+          ${isLive ? '🔴 LIVE' : isFinished ? 'FT' : '⏰ ' + (stageBadge || 'UPCOMING')}
+        </div>
+        ${scoreHtml}
+        ${statusHtml}
+        <div class="match-meta">
+          <span>${m.venue || ''}</span>
+          ${isScheduled ? `<span>${fmtDate(m.utcDate)}</span>` : ''}
+        </div>
+      </div>
+
+      <div class="team-block">
+        <div class="team-flag">${m.awayTeam?.crest || '🏳️'}</div>
+        <div class="team-name">${m.awayTeam?.shortName || m.awayTeam?.name}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Start countdowns for scheduled matches
+  matches.filter(m => m.status === 'SCHEDULED').forEach(m => {
+    const el = document.getElementById('cd_' + m.id);
+    if (el && m.utcDate) countdown(m.utcDate, el);
+  });
+}
+
+// ── Auto-refresh live tab every 60s ──────────────────────────────────────────
+loadMatches('live');
+setInterval(() => { if (activeTab === 'live') loadMatches('live'); }, 60000);
+</script>
+</body>
+</html>
