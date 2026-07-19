@@ -26,7 +26,7 @@ export function showToast(msg, duration = 3000) {
 // ── Active nav link ──────────────────────────────────────────────────────────
 export function setActiveNav() {
   const page = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-link').forEach(link => {
+  document.querySelectorAll('.nav-link, .ss-link, .sidebar-pill').forEach(link => {
     if (link.getAttribute('href') === page) link.classList.add('active');
   });
 }
@@ -305,4 +305,64 @@ export function initNav() {
     btn.textContent = saved.slice(0,6) + '...' + saved.slice(-4);
     btn.classList.add('connected');
   }
+
+  // Sidebar toggle logic
+  const toggleHeaders = document.querySelectorAll('.ss-toggle');
+  toggleHeaders.forEach(header => {
+    header.addEventListener('click', () => {
+      header.classList.toggle('collapsed');
+      const linksContainer = header.nextElementSibling;
+      if (linksContainer && linksContainer.classList.contains('ss-links')) {
+        linksContainer.classList.toggle('collapsed');
+      }
+    });
+  });
+}
+
+export function getTeamColor(teamNameOrId) {
+  const clean = (teamNameOrId || '').toLowerCase().trim();
+  const mapping = {
+    // Brazil
+    'br': '#FEDF00', 'bra': '#FEDF00', 'brazil': '#FEDF00',
+    // Argentina
+    'ar': '#75AADB', 'arg': '#75AADB', 'argentina': '#75AADB',
+    // France
+    'fr': '#21409A', 'fra': '#21409A', 'france': '#21409A',
+    // Germany
+    'de': '#111111', 'ger': '#111111', 'germany': '#111111',
+    // Spain
+    'es': '#C60B1E', 'esp': '#C60B1E', 'spain': '#C60B1E',
+    // England
+    'en': '#CE1126', 'eng': '#CE1126', 'england': '#CE1126',
+    // USA
+    'us': '#3C3B6E', 'usa': '#3C3B6E', 'united states': '#3C3B6E',
+    // Morocco
+    'ma': '#C1272D', 'mar': '#C1272D', 'morocco': '#C1272D',
+    // Netherlands
+    'nl': '#FF9B00', 'ned': '#FF9B00', 'netherlands': '#FF9B00',
+    // Portugal
+    'pt': '#E42828', 'por': '#E42828', 'portugal': '#E42828',
+    // Japan
+    'jp': '#BC002D', 'jpn': '#BC002D', 'japan': '#BC002D',
+    // Croatia
+    'hr': '#FF0000', 'cro': '#FF0000', 'croatia': '#FF0000',
+    // Colombia
+    'co': '#FCD116', 'col': '#FCD116', 'colombia': '#FCD116',
+    // Senegal / mg
+    'mg': '#00853F', 'sen': '#00853F', 'senegal': '#00853F',
+    // Italy
+    'it': '#008C45', 'ita': '#008C45', 'italy': '#008C45',
+    // Belgium
+    'be': '#000000', 'bel': '#000000', 'belgium': '#000000',
+    // Uruguay
+    'uy': '#0081C8', 'uru': '#0081C8', 'uruguay': '#0081C8',
+    // Switzerland
+    'ch': '#D52B1E', 'sui': '#D52B1E', 'switzerland': '#D52B1E',
+    // Al Hilal
+    'al hilal': '#005CA9',
+    // Al Nassr
+    'al nassr': '#FFF200'
+  };
+  
+  return mapping[clean] || '#00C6C6';
 }

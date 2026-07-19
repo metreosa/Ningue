@@ -92,8 +92,8 @@
       }
 
       bgCtx.beginPath();
-      bgCtx.strokeStyle = 'rgba(215, 218, 232, 0.06)';
-      bgCtx.lineWidth   = 1;
+      bgCtx.strokeStyle = 'rgba(215, 218, 232, 0.08)'; // Restored original subtle quality
+      bgCtx.lineWidth   = 1; // Restored original thin lines
 
       // Step by 8 instead of 4 for 2x rendering performance
       for (let x = 0; x <= W; x += 8) {
@@ -139,28 +139,7 @@
     }
   }
 
-  // ═══════════════════════════════════════════════════════════
-  //  BALL TILT — subtle 3-D tilt following the mouse
-  // ═══════════════════════════════════════════════════════════
-  const ballWrap = document.getElementById('ballWrap');
-  const ballImg  = document.getElementById('ballImg');
 
-  // Current and target tilt angles
-  let tiltX = 0, tiltY = 0;
-  let targetTiltX = 0, targetTiltY = 0;
-
-  window.addEventListener('mousemove', e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-
-    // Normalise to -1 … +1
-    const nx = (e.clientX / W) * 2 - 1;
-    const ny = (e.clientY / H) * 2 - 1;
-
-    // Max ±12° tilt
-    targetTiltX = -ny * 12;
-    targetTiltY =  nx * 12;
-  });
 
   // ═══════════════════════════════════════════════════════════
   //  RESIZE
@@ -182,19 +161,72 @@
     last = now;
     const elapsed = now / 1000;
 
-    // Smooth tilt interpolation
-    const lerpFactor = 1 - Math.pow(0.02, delta);
-    tiltX += (targetTiltX - tiltX) * lerpFactor;
-    tiltY += (targetTiltY - tiltY) * lerpFactor;
 
-    // Apply 3-D tilt to ball (CSS transform)
-    // The float animation lives in CSS; we only add the tilt on top
-    ballImg.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
 
-    // Draw background
+  // Draw background
     drawBackground(elapsed, delta);
   }
 
   requestAnimationFrame(animate);
+
+  // ═══════════════════════════════════════════════════════════
+  //  MODAL LOGIC
+  // ═══════════════════════════════════════════════════════════
+  const depositBtn = document.getElementById('depositBtn');
+  const depositOverlay = document.getElementById('depositModalOverlay');
+  const closeDeposit = document.getElementById('closeDeposit');
+  
+  const giftBtn = document.getElementById('giftBtn');
+  const giftOverlay = document.getElementById('giftModalOverlay');
+  const closeGift = document.getElementById('closeGift');
+
+  if (depositBtn) depositBtn.onclick = () => depositOverlay.classList.add('open');
+  if (closeDeposit) closeDeposit.onclick = () => depositOverlay.classList.remove('open');
+  
+  if (giftBtn) giftBtn.onclick = () => giftOverlay.classList.add('open');
+  if (closeGift) closeGift.onclick = () => giftOverlay.classList.remove('open');
+
+  // Close modals on outside click
+  window.addEventListener('click', (e) => {
+    if (e.target === depositOverlay) depositOverlay.classList.remove('open');
+    if (e.target === giftOverlay) giftOverlay.classList.remove('open');
+  });
+
+  // Modal Tabs
+  const tabCrypto = document.getElementById('tabCrypto');
+  const tabCash = document.getElementById('tabCash');
+  const cryptoContent = document.getElementById('cryptoContent');
+  const cashContent = document.getElementById('cashContent');
+
+  if (tabCrypto && tabCash) {
+    tabCrypto.onclick = () => {
+      tabCrypto.classList.add('active');
+      tabCash.classList.remove('active');
+      cryptoContent.classList.add('active');
+      cashContent.classList.remove('active');
+    };
+    tabCash.onclick = () => {
+      tabCash.classList.add('active');
+      tabCrypto.classList.remove('active');
+      cashContent.classList.add('active');
+      cryptoContent.classList.remove('active');
+    };
+  }
+
+  // Sidebar Mobile Toggle
+  const sidebar = document.getElementById('sidebar');
+  const menuOpenBtn = document.getElementById('menuOpenBtn');
+  const menuCloseBtn = document.getElementById('menuCloseBtn');
+
+  if (menuOpenBtn && sidebar) {
+    menuOpenBtn.addEventListener('click', () => {
+      sidebar.classList.add('open');
+    });
+  }
+  if (menuCloseBtn && sidebar) {
+    menuCloseBtn.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+  }
 
 })();

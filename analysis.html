@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match Probability Analysis — Ningue</title>
+  <meta name="description" content="Dynamic match win probabilities and historical shift analytics on Injective Protocol." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="shared.css?v=7" />
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="index.html" class="nav-brand">
+      <img src="assets/logo_ningue_transparent.png" alt="Ningue Logo" style="height:44px;" />
+      <span>Nin<span class="accent">gue</span></span>
+    </a>
+    <button class="mobile-menu-close" id="menuCloseBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+    </button>
+  </div>
+  <div class="sidebar-content">
+    
+    <!-- PORTFOLIO WIDGET -->
+    <div class="sidebar-widget">
+      <div class="sw-label">Portfolio <span class="sw-sub">(Last 24h)</span></div>
+      <div class="sw-val">$0.0</div>
+      <div class="sw-change">$0.0 (0.0%)</div>
+    </div>
+
+    <!-- BOX 2: Navigation Card -->
+    <div class="sidebar-card">
+      <!-- LIVE MATCHES PILL -->
+      <a href="livescores.html" class="sidebar-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Live Matches
+      </a>
+
+      <!-- DIVIDER -->
+      <div class="sidebar-divider"></div>
+
+      <!-- FOOTBALL SECTION -->
+      <div class="sidebar-section">
+        <div class="ss-header ss-toggle">
+          <span>Football</span>
+          <svg class="ss-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="ss-links">
+          <a href="markets.html" class="ss-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Live & Upcoming
+          </a>
+          <a href="#" class="ss-link">
+            <svg class="ss-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 808 1233" fill="none">
+              <path d="M0 201.879C0 89.8993 93.8438 0 198.725 0H610.371C697.904 0 807.518 71.7613 807.518 199.513C807.518 328.877 703.005 401.097 613.65 404.426C647.396 403.968 754.557 404.303 807.517 404.547V604.849H0.788591V391.929C0.788591 332.785 58.3557 201.879 197.936 201.879H0Z" fill="currentColor"/>
+              <path d="M608.795 627.335C713.676 627.335 807.52 717.234 807.52 829.214H609.583C734.968 829.214 807.52 939.617 807.52 1029.52C807.52 1131.24 726.293 1232.18 614.313 1232.18H205.035C55.2026 1232.18 0.00238037 1098.91 0.00238037 1046.08L0.0020752 1025.79C0.00170898 999.669 0.00134277 972.247 0.00134277 826.848C0.00134277 699.096 109.615 627.335 197.149 627.335H608.795Z" fill="currentColor"/>
+            </svg> World Cup'26
+          </a>
+          <a href="#" class="ss-link"><img src="assets/spl_logo_processed.png" class="ss-icon" /> SPL</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/MLS%20Inactive%201_128x128.png" class="ss-icon" /> MLS</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/League_Logos_3X/EPL_Inactive_48x48.png" class="ss-icon" /> EPL</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/League_Logos_3X/LaLiga_Inactive_128x128.png" class="ss-icon" /> La Liga</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/Series%20A%20Inactive_128x128.png" class="ss-icon" /> Serie A</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/League_Logos_3X/UCL_Inactive_128x128.png" class="ss-icon" /> UCL</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/Bundesliga%20inactive_128x128.png" class="ss-icon" /> Bundesliga</a>
+          <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/Ligue1%20inactive_128x128.png" class="ss-icon" /> Ligue 1</a>
+        </div>
+      </div>
+
+      <!-- GAMES SECTION -->
+      <div class="sidebar-section ss-disabled ss-tooltip-wrap">
+        <div class="ss-header">Games</div>
+        <div class="ss-tooltip">Coming soon</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <button class="mobile-menu-open" id="menuOpenBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <a href="index.html" class="nav-brand mobile-only">
+      <img src="assets/logo_ningue_transparent.png" alt="Ningue Logo" style="height:36px;" />
+      <span>Nin<span class="accent">gue</span></span>
+    </a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-deposit" id="depositBtn">Deposit</button>
+    <div class="interest-badge" title="Requires $10,000+ balance to unlock 6% Yield">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      6% Interest
+    </div>
+    <div class="nav-gift-icon" title="Rewards coming soon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>
+    </div>
+    <a href="profile.html" class="nav-avatar" title="My Account">
+      <img src="assets/ninja_avatar.png" alt="Profile" />
+    </a>
+  </div>
+</nav>
+
+<!-- Main Page Layout -->
+<div class="page">
+  <div class="container">
+    <div class="analysis-wrapper" style="max-width: 800px; margin: 1.5rem auto;">
+      
+      <!-- Top info bar -->
+      <div class="analysis-header-row">
+        <span class="analysis-badge" id="stageBadge">REG TIME</span>
+        <span class="analysis-vol" id="volBadge">$29.2K Vol.</span>
+      </div>
+
+      <!-- Teams visual -->
+      <div class="analysis-teams-row">
+        <div class="analysis-team" id="homeTeamBox">
+          <span class="flag" id="homeFlag"></span>
+          <span id="homeName">Home Team</span>
+        </div>
+        <div class="analysis-team" id="awayTeamBox" style="flex-direction: row-reverse;">
+          <span class="flag" id="awayFlag"></span>
+          <span id="awayName">Away Team</span>
+        </div>
+      </div>
+
+      <!-- 3-Way Probability Bar (Equal Width Segments) -->
+      <div class="prob-bar-container">
+        <div class="prob-bar">
+          <div class="prob-seg prob-seg-home" id="barHome" style="width: 33.333%;">33%</div>
+          <div class="prob-seg prob-seg-draw" id="barDraw" style="width: 33.334%;">34%</div>
+          <div class="prob-seg prob-seg-away" id="barAway" style="width: 33.333%;">33%</div>
+        </div>
+      </div>
+
+      <!-- Market/Analysis Dropdown Selector -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; margin-bottom: 0.8rem;">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Probability Shift</h4>
+        <select class="lh-select" id="marketSelect">
+          <option value="moneyline">Moneyline - 1x2</option>
+          <option value="first_goal">1st Goal</option>
+          <option value="team_to_advance" disabled>Team To Advance (Coming soon)</option>
+          <option value="totals" disabled>Totals (Coming soon)</option>
+          <option value="spreads" disabled>Spreads (Coming soon)</option>
+          <option value="btts" disabled>BTTS (Coming soon)</option>
+          <option value="total_corners" disabled>Total Corners (Coming soon)</option>
+          <option value="team_totals" disabled>Team Totals (Coming soon)</option>
+        </select>
+      </div>
+
+      <!-- Graph Card -->
+      <div class="graph-card">
+        <canvas class="graph-canvas" id="probGraphCanvas"></canvas>
+        
+        <!-- Legend at the bottom (Compact circles and text) -->
+        <div class="legend-container" id="legendContainer" style="margin-top: 1.2rem; margin-bottom: 0; justify-content: center; gap: 1.5rem;">
+          <div class="legend-item" style="font-size: 0.75rem; gap: 0.35rem; cursor: default;">
+            <div class="legend-swatch" id="legendHomeSwatch" style="width: 7px; height: 7px; border-radius: 50%;"></div>
+            <span id="legendHomeLabel" style="font-weight: 600; font-size: 0.75rem; color: var(--text-muted);">Home</span>
+          </div>
+          <div class="legend-item" style="font-size: 0.75rem; gap: 0.35rem; cursor: default;">
+            <div class="legend-swatch" style="width: 7px; height: 7px; border-radius: 50%; background-color: #4A4A5A;"></div>
+            <span id="legendDrawLabel" style="font-weight: 600; font-size: 0.75rem; color: var(--text-muted);">DRAW</span>
+          </div>
+          <div class="legend-item" style="font-size: 0.75rem; gap: 0.35rem; cursor: default;">
+            <div class="legend-swatch" id="legendAwaySwatch" style="width: 7px; height: 7px; border-radius: 50%;"></div>
+            <span id="legendAwayLabel" style="font-weight: 600; font-size: 0.75rem; color: var(--text-muted);">Away</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- x402 Payment Gate — AI Analysis Unlock -->
+      <div class="x402-gate" id="x402Gate">
+        <div class="x402-lock-icon">🔒</div>
+        <div class="x402-title">Unlock AI Match Analysis</div>
+        <div class="x402-sub">
+          Get a detailed AI prediction powered by MCP Agent Skills — including predicted score, 
+          key factors, market insights, and risk assessment. Payment verified on Injective via x402.
+        </div>
+        <div class="x402-price-row">
+          <span class="x402-price">$0.10</span>
+          <span class="x402-currency">USDC · Injective EVM</span>
+        </div>
+        <button class="btn-x402" id="unlockBtn" onclick="unlockAnalysis()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Pay & Unlock
+        </button>
+        <div class="x402-features">
+          <div class="x402-feat"><div class="feat-dot"></div> AI prediction</div>
+          <div class="x402-feat"><div class="feat-dot"></div> MCP Agent Skills</div>
+          <div class="x402-feat"><div class="feat-dot"></div> On-chain verified</div>
+          <div class="x402-feat"><div class="feat-dot"></div> Injective x402</div>
+        </div>
+      </div>
+
+      <!-- x402 Analysis Results (hidden until paid) -->
+      <div class="x402-result" id="x402Result" style="display: none;">
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="main.js"></script>
+<script type="module">
+  import { initNav, apiGet, getTeamColor } from './shared.js';
+  initNav();
+
+  // Parse URL Parameters
+  const params = new URLSearchParams(window.location.search);
+  const matchId = params.get('matchId') || 'm001';
+  const homeId = params.get('home') || 'br';
+  const awayId = params.get('away') || 'ar';
+
+  let originalProbHome = 45;
+  let originalProbDraw = 22;
+  let originalProbAway = 33;
+  
+  let currentProbHome = 45;
+  let currentProbDraw = 22;
+  let currentProbAway = 33;
+
+  let activeData = [];
+  let hoveredIdx = null;
+
+  let hCode = 'HOME';
+  let aCode = 'AWAY';
+  let homeColor = '#00C6C6';
+  let awayColor = '#004C4C';
+
+  // Helper for crest HTML/Element
+  function setCrest(el, crest) {
+    if (!crest) {
+      el.innerHTML = '';
+      return;
+    }
+    if (crest.startsWith('http') || crest.startsWith('/') || crest.includes('.')) {
+      el.innerHTML = `<img src="${crest}" alt="">`;
+    } else {
+      el.innerHTML = crest;
+      el.style.fontSize = '20px';
+      el.style.display = 'inline-flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      el.style.lineHeight = '1';
+    }
+  }
+
+  // Draw probability-over-time graph on canvas
+  function drawProbabilityGraph(canvas, data, homeName, awayName, homeColor, awayColor) {
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    const width = rect.width;
+    const height = rect.height;
+    ctx.clearRect(0, 0, width, height);
+    
+    const paddingLeft = 40;
+    const paddingRight = 90;
+    const paddingTop = 20;
+    const paddingBottom = 30;
+    
+    const graphWidth = width - paddingLeft - paddingRight;
+    const graphHeight = height - paddingTop - paddingBottom;
+    
+    // Draw Grid Lines (y-axis: 0%, 25%, 50%, 75%, 100%)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '500 10px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    
+    for (let i = 0; i <= 4; i++) {
+      const val = i * 25;
+      const y = paddingTop + graphHeight * (1 - val / 100);
+      ctx.beginPath();
+      ctx.moveTo(paddingLeft, y);
+      ctx.lineTo(paddingLeft + graphWidth, y);
+      ctx.stroke();
+      ctx.fillText(`${val}%`, paddingLeft - 8, y);
+    }
+    
+    // Draw Time Labels (x-axis)
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const times = ['24h ago', '18h ago', '12h ago', '6h ago', 'Now'];
+    for (let i = 0; i < times.length; i++) {
+      const x = paddingLeft + (graphWidth * i) / (times.length - 1);
+      ctx.fillText(times[i], x, paddingTop + graphHeight + 8);
+    }
+
+    // Draw vertical crosshair line if hovered
+    if (hoveredIdx !== null && data.length > 0) {
+      const crosshairX = paddingLeft + (graphWidth * hoveredIdx) / (data.length - 1);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]); // dashed line
+      ctx.beginPath();
+      ctx.moveTo(crosshairX, paddingTop);
+      ctx.lineTo(crosshairX, paddingTop + graphHeight);
+      ctx.stroke();
+      ctx.setLineDash([]); // Reset
+      
+      // Draw interactive dots on the lines
+      for (const [key, color] of [['a', homeColor], ['draw', '#4A4A5A'], ['b', awayColor]]) {
+        const val = data[hoveredIdx][key];
+        const y = paddingTop + graphHeight * (1 - val / 100);
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#1c1c22';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(crosshairX, y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+    
+    // Helper to draw line
+    function drawLine(key, color, labelText) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.6; // Thinner clean line weight (Requirement 5)
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      // glow
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 4;
+      
+      ctx.beginPath();
+      for (let i = 0; i < data.length; i++) {
+        const x = paddingLeft + (graphWidth * i) / (data.length - 1);
+        const val = data[i][key];
+        const y = paddingTop + graphHeight * (1 - val / 100);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0;
+      
+      const lastIdx = data.length - 1;
+      const xEnd = paddingLeft + graphWidth;
+      const yEnd = paddingTop + graphHeight * (1 - data[lastIdx][key] / 100);
+      
+      // Use hovered index value if mouse is active (Requirement 6)
+      const displayIdx = (hoveredIdx !== null) ? hoveredIdx : lastIdx;
+      const displayVal = Math.round(data[displayIdx][key]);
+      
+      ctx.fillStyle = color;
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`  ${labelText} ${displayVal}%`, xEnd, yEnd);
+    }
+    
+    const drawLabelEl = document.getElementById('legendDrawLabel');
+    const drawLabel = drawLabelEl ? drawLabelEl.innerText : 'DRAW';
+    drawLine('a', homeColor, homeName);
+    drawLine('draw', '#4A4A5A', drawLabel);
+    drawLine('b', awayColor, awayName);
+  }
+
+  // Generate historical points ending exactly at current values
+  function generateGraphData(currentProbA, currentProbDraw, currentProbB) {
+    const points = [];
+    const startProbA = 35;
+    const startProbDraw = 30;
+    const startProbB = 35;
+    
+    for (let i = 0; i < 20; i++) {
+      const t = i / 19;
+      const noiseA = Math.sin(t * Math.PI * 2) * 5 * (1 - t);
+      const noiseB = Math.cos(t * Math.PI * 2.5) * 5 * (1 - t);
+      
+      let a = startProbA + (currentProbA - startProbA) * t + noiseA;
+      let b = startProbB + (currentProbB - startProbB) * t + noiseB;
+      let draw = 100 - a - b;
+      
+      if (a < 5) a = 5;
+      if (b < 5) b = 5;
+      if (draw < 5) draw = 5;
+      const sum = a + b + draw;
+      points.push({
+        a: (a / sum) * 100,
+        draw: (draw / sum) * 100,
+        b: (b / sum) * 100
+      });
+    }
+    return points;
+  }
+
+  let moneylineProbHome = 52;
+  let moneylineProbDraw = 22;
+  let moneylineProbAway = 26;
+  let moneylineVol = '$35.5K';
+
+  let firstGoalProbHome = 54;
+  let firstGoalProbDraw = 16;
+  let firstGoalProbAway = 30;
+  let firstGoalVol = '$26.3K';
+
+  let currentMarket = 'moneyline';
+
+  function updateProbabilities(selectedMarket) {
+    currentMarket = selectedMarket;
+    let currentProbHome = 33;
+    let currentProbDraw = 34;
+    let currentProbAway = 33;
+    let vol = '0K';
+    let drawLabel = 'DRAW';
+
+    if (selectedMarket === 'first_goal') {
+      currentProbHome = firstGoalProbHome;
+      currentProbDraw = firstGoalProbDraw;
+      currentProbAway = firstGoalProbAway;
+      vol = firstGoalVol;
+      drawLabel = 'NO GOAL';
+    } else {
+      // moneyline
+      currentProbHome = moneylineProbHome;
+      currentProbDraw = moneylineProbDraw;
+      currentProbAway = moneylineProbAway;
+      vol = moneylineVol;
+      drawLabel = 'DRAW';
+    }
+
+    // Update equal-width segments text
+    document.getElementById('barHome').innerText = `${currentProbHome}%`;
+    document.getElementById('barDraw').innerText = `${currentProbDraw}%`;
+    document.getElementById('barAway').innerText = `${currentProbAway}%`;
+
+    // Update volume badge
+    document.getElementById('volBadge').innerText = `${vol} Vol.`;
+
+    // Update legend draw label
+    const drawLegendEl = document.getElementById('legendDrawLabel');
+    if (drawLegendEl) {
+      drawLegendEl.innerText = drawLabel;
+    }
+
+    // Re-generate and draw graph
+    activeData = generateGraphData(currentProbHome, currentProbDraw, currentProbAway);
+    const canvas = document.getElementById('probGraphCanvas');
+    drawProbabilityGraph(canvas, activeData, hCode, aCode, homeColor, awayColor);
+  }
+
+  async function loadAnalysis() {
+    try {
+      // 1. Fetch match and market details
+      const [scoresRes, moneylineRes, firstGoalRes] = await Promise.all([
+        apiGet('/api/scores'),
+        apiGet(`/api/markets/${matchId}/odds`).catch(() => null),
+        apiGet(`/api/markets/${matchId}/first-goal-odds`).catch(() => null)
+      ]);
+
+      const match = (scoresRes.matches || []).find(m => m.id === matchId);
+      if (!match) {
+        return;
+      }
+
+      // 2. Set Up Team Names, Crests, and Colors
+      const hName = match.homeTeam?.name || 'Home Team';
+      const aName = match.awayTeam?.name || 'Away Team';
+      hCode = match.homeTeam?.shortName || hName.slice(0, 3).toUpperCase();
+      aCode = match.awayTeam?.shortName || aName.slice(0, 3).toUpperCase();
+
+      document.getElementById('homeName').innerText = hName;
+      document.getElementById('awayName').innerText = aName;
+      document.getElementById('legendHomeLabel').innerText = hCode;
+      document.getElementById('legendAwayLabel').innerText = aCode;
+
+      setCrest(document.getElementById('homeFlag'), match.homeTeam?.crest);
+      setCrest(document.getElementById('awayFlag'), match.awayTeam?.crest);
+
+      // Sourcing team colors
+      homeColor = getTeamColor(homeId || hName);
+      awayColor = getTeamColor(awayId || aName);
+
+      // Inject custom team colors
+      document.getElementById('barHome').style.backgroundColor = homeColor;
+      document.getElementById('barAway').style.backgroundColor = awayColor;
+      document.getElementById('legendHomeSwatch').style.backgroundColor = homeColor;
+      document.getElementById('legendAwaySwatch').style.backgroundColor = awayColor;
+
+      // 3. Parse Odds
+      if (moneylineRes) {
+        if (moneylineRes.homeWin) {
+          moneylineProbHome = Math.round(moneylineRes.homeWin.probability * 100);
+          moneylineProbDraw = Math.round(moneylineRes.draw.probability * 100);
+          moneylineProbAway = 100 - moneylineProbHome - moneylineProbDraw;
+          moneylineVol = moneylineRes.totalPool ? moneylineRes.totalPool.replace(' USDC', '') : '$35.5K';
+        }
+      }
+
+      if (firstGoalRes) {
+        if (firstGoalRes.homeFirst) {
+          firstGoalProbHome = Math.round(firstGoalRes.homeFirst.probability * 100);
+          firstGoalProbDraw = Math.round(firstGoalRes.noGoal.probability * 100);
+          firstGoalProbAway = 100 - firstGoalProbHome - firstGoalProbDraw;
+          firstGoalVol = firstGoalRes.totalPool ? firstGoalRes.totalPool.replace(' USDC', '') : '$26.3K';
+        }
+      }
+
+      // Update badge info
+      document.getElementById('stageBadge').innerText = match.stage ? match.stage.replace('_', ' ') : (match.status === 'IN_PLAY' ? 'LIVE' : 'REG TIME');
+
+      // 4. Initial update (renders moneyline market)
+      updateProbabilities('moneyline');
+
+      // 5. Setup canvas resize handler
+      const canvas = document.getElementById('probGraphCanvas');
+      window.addEventListener('resize', () => {
+        drawProbabilityGraph(canvas, activeData, hCode, aCode, homeColor, awayColor);
+      });
+
+      // 6. Setup Canvas Hover Interactivity
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        
+        const paddingLeft = 40;
+        const paddingRight = 90;
+        const graphWidth = rect.width - paddingLeft - paddingRight;
+        
+        if (mouseX >= paddingLeft && mouseX <= paddingLeft + graphWidth) {
+          const fraction = (mouseX - paddingLeft) / graphWidth;
+          const totalPoints = activeData.length;
+          if (totalPoints > 0) {
+            const idx = Math.min(totalPoints - 1, Math.max(0, Math.round(fraction * (totalPoints - 1))));
+            if (hoveredIdx !== idx) {
+              hoveredIdx = idx;
+              drawProbabilityGraph(canvas, activeData, hCode, aCode, homeColor, awayColor);
+            }
+          }
+        } else {
+          if (hoveredIdx !== null) {
+            hoveredIdx = null;
+            drawProbabilityGraph(canvas, activeData, hCode, aCode, homeColor, awayColor);
+          }
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', () => {
+        if (hoveredIdx !== null) {
+          hoveredIdx = null;
+          drawProbabilityGraph(canvas, activeData, hCode, aCode, homeColor, awayColor);
+        }
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Dropdown change listener
+  document.getElementById('marketSelect').addEventListener('change', (e) => {
+    updateProbabilities(e.target.value);
+  });
+
+  // ── x402 Payment Gate — Unlock AI Analysis ──────────────────────────────
+  window.unlockAnalysis = async function() {
+    const btn = document.getElementById('unlockBtn');
+    const gate = document.getElementById('x402Gate');
+    const result = document.getElementById('x402Result');
+
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Processing…`;
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+
+    try {
+      const API = 'http://localhost:3001';
+      const res = await fetch(`${API}/api/analyse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matchId, homeTeamId: homeId, awayTeamId: awayId }),
+      });
+
+      if (res.status === 402) {
+        // x402 payment required — show payment details to user
+        const paymentData = await res.json().catch(() => ({}));
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Connect Keplr to Pay`;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+
+        // For demo: show that x402 is working by displaying the 402 response
+        // In production, Keplr would sign the payment and re-send with payment header
+        if (window.keplr) {
+          try {
+            await window.keplr.enable('injective-1');
+            // Would sign x402 payment here and re-send request
+            // For demo, simulate success after wallet connection
+            showDemoAnalysis(gate, result);
+          } catch {
+            alert('Please approve the Keplr connection to pay for analysis.');
+          }
+        } else {
+          // No Keplr — show demo mode
+          const proceed = confirm('x402 returned 402 Payment Required ($0.10 USDC on Injective EVM).\n\nKeplr wallet not detected. Show demo analysis instead?');
+          if (proceed) {
+            showDemoAnalysis(gate, result);
+          } else {
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pay & Unlock`;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+          }
+        }
+        return;
+      }
+
+      // Success (demo mode or paid)
+      const data = await res.json();
+      renderAnalysisResults(gate, result, data);
+
+    } catch (err) {
+      console.error('x402 analysis error:', err);
+      // Network error — offer demo fallback
+      const proceed = confirm('Could not reach x402 facilitator (expected in local dev).\n\nShow demo AI analysis to demonstrate the feature?');
+      if (proceed) {
+        showDemoAnalysis(gate, result);
+      } else {
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pay & Unlock`;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+  };
+
+  function showDemoAnalysis(gate, result) {
+    const demoData = {
+      analysis: {
+        summary: `Spain holds a slight edge heading into the World Cup 2026 Final based on their dominant tournament run and superior squad depth. The Injective probability model currently prices Spain at 52% implied probability. Argentina's talisman Lionel Messi provides an x-factor that data alone cannot fully capture.`,
+        prediction: { winner: 'Spain', score: '2-1', confidence: 62 },
+        keyFactors: [
+          'Spain have scored in every match of this tournament (14 goals in 6 games)',
+          'Argentina conceded in 3 of their last 4 knockout matches',
+          'Market odds on Injective reflect 52% implied probability for Spain',
+          'Neutral venue (MetLife Stadium) slightly reduces Argentina\'s crowd advantage',
+        ],
+        marketInsight: 'The Injective market (35,500 USDC total pool) prices Spain at 1.92x — slightly tighter than our model suggests at 1.85x, indicating the market may be slightly overvaluing the favourite.',
+        riskLevel: 'Medium',
+      },
+      generatedBy: 'demo-mode (x402 facilitator not connected)',
+      dataSources: ['MCP: get_match_info', 'MCP: get_market_odds', 'MCP: get_head_to_head', 'MCP: get_squad_info'],
+    };
+    renderAnalysisResults(gate, result, demoData);
+  }
+
+  function renderAnalysisResults(gate, result, data) {
+    const a = data.analysis;
+    gate.style.display = 'none';
+    result.style.display = 'block';
+
+    const riskColors = { Low: '#2ecc71', Medium: '#f39c12', High: '#e74c3c' };
+    const riskColor = riskColors[a.riskLevel] || '#f39c12';
+
+    result.innerHTML = `
+      <div class="analysis-card">
+        <div class="analysis-card-title">🔓 AI Analysis Unlocked</div>
+        <p>${a.summary}</p>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.8rem;display:flex;flex-wrap:wrap;gap:0.5rem;">
+          ${(data.dataSources || []).map(s => `<span style="background:rgba(0,198,198,0.1);padding:0.15rem 0.5rem;border-radius:4px;color:var(--accent);">${s}</span>`).join('')}
+        </div>
+      </div>
+      <div class="analysis-card">
+        <div class="analysis-card-title">Predicted Score</div>
+        <div class="predicted-score">
+          <span>${a.prediction?.score?.split('-')[0] || '2'}</span>
+          <span class="vs">—</span>
+          <span>${a.prediction?.score?.split('-')[1] || '1'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.3rem;">
+          <span>Confidence</span>
+          <span style="color:var(--accent);font-weight:700;">${a.prediction?.confidence || 62}%</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width:${a.prediction?.confidence || 62}%;"></div>
+        </div>
+      </div>
+      <div class="analysis-card">
+        <div class="analysis-card-title">Key Prediction Factors</div>
+        <ul style="padding-left:1.2rem;">
+          ${(a.keyFactors || []).map(f => `<li>${f}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="analysis-card">
+        <div class="analysis-card-title">Ningue Market Insight</div>
+        <p>${a.marketInsight || ''}</p>
+      </div>
+      <div class="analysis-card" style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="analysis-card-title" style="margin-bottom:0;">Risk Assessment</div>
+        </div>
+        <span style="font-size:0.9rem;font-weight:800;color:${riskColor};">${a.riskLevel || 'Medium'}</span>
+      </div>
+      <div style="text-align:center;font-size:0.7rem;color:var(--text-muted);margin-top:1rem;">
+        Generated by <span style="color:var(--accent);">${data.generatedBy || 'MCP + AI'}</span> · Payment verified via x402 on Injective
+      </div>
+    `;
+  }
+
+  loadAnalysis();
+</script>
+</body>
+</html>

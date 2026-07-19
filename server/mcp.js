@@ -8,7 +8,7 @@
 //
 //   TOOLS defined here (= Agent Skills):
 //     1. get_match_info     → fetches live match data from football API
-//     2. get_market_odds    → fetches prediction market odds from Injective
+//     2. get_market_odds    → fetches probability model data from Injective
 //     3. get_head_to_head   → fetches historical H2H stats
 //     4. get_squad_info     → fetches starting players & form
 //
@@ -37,7 +37,7 @@ async function fetchMatchInfo(matchId) {
   }
 }
 
-// ── Tool 2: Market odds from Injective prediction market ─────────────────────
+// ── Tool 2: Probability models from Injective ─────────────────────
 async function fetchMarketOdds(matchId) {
   try {
     const res = await fetch(
@@ -48,6 +48,15 @@ async function fetchMarketOdds(matchId) {
   } catch {
     // Graceful fallback: return realistic mock odds
     return getMockOdds(matchId);
+  }
+}
+
+// ── Tool 2b: First goal odds ──────────────────────────────────────────────────
+async function fetchFirstGoalOdds(matchId) {
+  try {
+    throw new Error('Real first goal API not configured');
+  } catch {
+    return getMockFirstGoalOdds(matchId);
   }
 }
 
@@ -100,10 +109,21 @@ export function createMCPServer() {
   // Register Tool 2: get_market_odds (Agent Skill — Injective-specific)
   server.tool(
     'get_market_odds',
-    'Fetch current on-chain prediction market odds from Injective Exchange for a match. Shows how the market collectively rates each team\'s chances.',
-    { matchId: z.string().describe('Match ID to get prediction market data for') },
+    'Fetch current on-chain probability model data from Injective Exchange for a match. Shows how the market collectively rates each team\'s chances.',
+    { matchId: z.string().describe('Match ID to get probability model data for') },
     async ({ matchId }) => {
       const data = await fetchMarketOdds(matchId);
+      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+    }
+  );
+
+  // Register Tool 2b: get_first_goal_odds (Agent Skill)
+  server.tool(
+    'get_first_goal_odds',
+    'Fetch probability model odds for which team will score the first goal in a match.',
+    { matchId: z.string().describe('Match ID to get first goal market data for') },
+    async ({ matchId }) => {
+      const data = await fetchFirstGoalOdds(matchId);
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     }
   );
@@ -140,6 +160,7 @@ export function createMCPServer() {
 export const mcpTools = {
   get_match_info:  fetchMatchInfo,
   get_market_odds: fetchMarketOdds,
+  get_first_goal_odds: fetchFirstGoalOdds,
   get_head_to_head: fetchH2H,
   get_squad_info:  fetchSquadInfo,
 };
@@ -158,7 +179,15 @@ export const openAITools = [
     type: 'function',
     function: {
       name:        'get_market_odds',
-      description: 'Fetch current on-chain prediction market odds from Injective for a match.',
+      description: 'Fetch current on-chain probability model data from Injective for a match.',
+      parameters:  { type: 'object', properties: { matchId: { type: 'string' } }, required: ['matchId'] },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name:        'get_first_goal_odds',
+      description: 'Fetch probability model odds for which team will score the first goal in a match.',
       parameters:  { type: 'object', properties: { matchId: { type: 'string' } }, required: ['matchId'] },
     },
   },
@@ -190,19 +219,44 @@ export const openAITools = [
 // ── Mock data fallbacks ───────────────────────────────────────────────────────
 function getMockMatch(matchId) {
   const matches = {
-    'm001': { id: 'm001', status: 'IN_PLAY', minute: 67, homeTeam: { id: 'br', name: 'Brazil', shortName: 'BRA', crest: '🇧🇷' }, awayTeam: { id: 'ar', name: 'Argentina', shortName: 'ARG', crest: '🇦🇷' }, score: { home: 2, away: 1 }, stage: 'QUARTER_FINALS', venue: 'MetLife Stadium, New Jersey', referee: 'S. Marciniak' },
-    'm002': { id: 'm002', status: 'IN_PLAY', minute: 23, homeTeam: { id: 'fr', name: 'France', shortName: 'FRA', crest: '🇫🇷' }, awayTeam: { id: 'de', name: 'Germany', shortName: 'GER', crest: '🇩🇪' }, score: { home: 0, away: 0 }, stage: 'QUARTER_FINALS', venue: 'Rose Bowl, Los Angeles', referee: 'D. Siebert' },
-    'm003': { id: 'm003', status: 'SCHEDULED', utcDate: '2026-07-14T20:00:00Z', homeTeam: { id: 'es', name: 'Spain', shortName: 'ESP', crest: '🇪🇸' }, awayTeam: { id: 'en', name: 'England', shortName: 'ENG', crest: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' }, stage: 'QUARTER_FINALS', venue: 'SoFi Stadium, Los Angeles' },
-    'm004': { id: 'm004', status: 'SCHEDULED', utcDate: '2026-07-15T17:00:00Z', homeTeam: { id: 'us', name: 'USA', shortName: 'USA', crest: '🇺🇸' }, awayTeam: { id: 'ma', name: 'Morocco', shortName: 'MAR', crest: '🇲🇦' }, stage: 'QUARTER_FINALS', venue: 'AT&T Stadium, Dallas' },
+    'm001': {
+      id: 'm001',
+      status: 'SCHEDULED',
+      utcDate: '2026-07-19T19:00:00Z',
+      homeTeam: { id: 'es', name: 'Spain', shortName: 'ESP', crest: 'https://flagcdn.com/w40/es.png' },
+      awayTeam: { id: 'ar', name: 'Argentina', shortName: 'ARG', crest: 'https://flagcdn.com/w40/ar.png' },
+      score: { home: null, away: null },
+      stage: 'FINAL',
+      venue: 'MetLife Stadium, New Jersey'
+    }
   };
   return matches[matchId] || matches['m001'];
 }
 
 function getMockOdds(matchId) {
   const odds = {
-    'm001': { matchId, homeWin: { probability: 0.52, impliedOdds: 1.92, totalBets: '12,450 USDC' }, draw: { probability: 0.21, impliedOdds: 4.76, totalBets: '5,230 USDC' }, awayWin: { probability: 0.27, impliedOdds: 3.70, totalBets: '7,320 USDC' }, totalPool: '25,000 USDC', lastUpdated: new Date().toISOString() },
-    'm002': { matchId, homeWin: { probability: 0.45, impliedOdds: 2.22, totalBets: '9,100 USDC' }, draw: { probability: 0.28, impliedOdds: 3.57, totalBets: '5,600 USDC' }, awayWin: { probability: 0.27, impliedOdds: 3.70, totalBets: '5,300 USDC' }, totalPool: '20,000 USDC', lastUpdated: new Date().toISOString() },
-    'm003': { matchId, homeWin: { probability: 0.48, impliedOdds: 2.08, totalBets: '18,200 USDC' }, draw: { probability: 0.24, impliedOdds: 4.17, totalBets: '9,100 USDC' }, awayWin: { probability: 0.28, impliedOdds: 3.57, totalBets: '10,700 USDC' }, totalPool: '38,000 USDC', lastUpdated: new Date().toISOString() },
+    'm001': {
+      matchId,
+      homeWin: { probability: 0.52, impliedOdds: 1.92, totalBets: '18,500 USDC' },
+      draw: { probability: 0.22, impliedOdds: 4.54, totalBets: '7,800 USDC' },
+      awayWin: { probability: 0.26, impliedOdds: 3.85, totalBets: '9,200 USDC' },
+      totalPool: '35,500 USDC',
+      lastUpdated: new Date().toISOString()
+    }
+  };
+  return odds[matchId] || odds['m001'];
+}
+
+function getMockFirstGoalOdds(matchId) {
+  const odds = {
+    'm001': {
+      matchId,
+      homeFirst: { probability: 0.54, impliedOdds: 1.85, totalBets: '14,200 USDC' },
+      noGoal: { probability: 0.16, impliedOdds: 6.25, totalBets: '4,200 USDC' },
+      awayFirst: { probability: 0.30, impliedOdds: 3.33, totalBets: '7,900 USDC' },
+      totalPool: '26,300 USDC',
+      lastUpdated: new Date().toISOString()
+    }
   };
   return odds[matchId] || odds['m001'];
 }
