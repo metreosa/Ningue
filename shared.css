@@ -1209,3 +1209,69 @@ html, body {
   height: 100%; border-radius: 3px; background: var(--accent);
   transition: width 1s ease;
 }
+
+/* Profile Dropdown */
+.nav-avatar-wrapper { position: relative; }
+.avatar-dropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 240px;
+  padding: 0.5rem 0;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+.nav-avatar-wrapper:hover .avatar-dropdown {
+  display: flex;
+}
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.dropdown-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+}
+.dropdown-info {
+  display: flex;
+  flex-direction: column;
+}
+.dropdown-primary-address {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+.dropdown-secondary-address {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 2px;
+}
+.dropdown-links {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+.dropdown-links a {
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.dropdown-links a:hover {
+  background: rgba(255,255,255,0.05);
+}

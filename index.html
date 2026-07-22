@@ -96,20 +96,49 @@
         <span>Nin<span class="accent">gue</span></span>
       </a>
     </div>
-    <div class="nav-right">
-    <button class="btn-deposit" id="depositBtn">Bridge</button>
-    <div class="interest-badge" title="Requires $10,000+ balance to unlock 6% Yield">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      6% Interest
+    <div class="nav-right" id="navAuthContainer">
+      <!-- Auth content injected via JS -->
     </div>
-    <div class="nav-gift-icon" title="Rewards coming soon">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>
-    </div>
-    <a href="profile.html" class="nav-avatar" title="My Account">
-      <img src="assets/ninja_avatar.png" alt="Profile" />
-    </a>
-  </div>
-</nav>
+
+    <!-- Template: Logged Out -->
+    <template id="tmplLoggedOut">
+      <button class="btn-signin" id="btnGoogleSignIn" style="background: white; color: #000; display: flex; align-items: center; gap: 0.5rem; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 600; cursor: pointer; border: none; font-size: 0.9rem;">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+        Sign in
+      </button>
+    </template>
+
+    <!-- Template: Logged In -->
+    <template id="tmplLoggedIn">
+      <button class="btn-deposit" id="depositBtn">Bridge</button>
+      <div class="interest-badge" title="Requires $10,000+ balance to unlock 6% Yield">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        6% Interest
+      </div>
+      <div class="nav-gift-icon" title="Rewards coming soon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>
+      </div>
+      <div class="nav-avatar-wrapper" style="position: relative;">
+        <div class="nav-avatar" id="avatarMenuBtn" style="cursor: pointer;">
+          <img src="assets/ninja_avatar.png" alt="Profile" />
+        </div>
+        <!-- Profile Dropdown -->
+        <div class="avatar-dropdown" id="avatarDropdown">
+          <div class="dropdown-header">
+            <img src="assets/ninja_avatar.png" alt="Profile" class="dropdown-avatar" />
+            <div class="dropdown-info">
+              <div class="dropdown-primary-address">0x00D...c543</div>
+              <div class="dropdown-secondary-address">0x6939...eFFb <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+            </div>
+          </div>
+          <div class="dropdown-links">
+            <a href="profile.html">View profile</a>
+            <a href="#" id="logoutBtn" style="color: #ff5252;">Log out</a>
+          </div>
+        </div>
+      </div>
+    </template>
+  </nav>
 
   <!-- Layer 0: water-flow background -->
   <canvas id="bgCanvas"></canvas>
@@ -909,6 +938,51 @@
       statusTitle.textContent = `${amount} USDC Bridged!`;
       statusSub.textContent = 'USDC has arrived on Injective. You can start trading.';
     };
+
+    // ── Auth Logic ──────────────────────────────────────────────────────────
+    function renderNav() {
+      const authContainer = document.getElementById('navAuthContainer');
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      
+      authContainer.innerHTML = '';
+      if (isLoggedIn) {
+        authContainer.appendChild(document.getElementById('tmplLoggedIn').content.cloneNode(true));
+        
+        // Bind Bridge Modal
+        const dBtn = document.getElementById('depositBtn');
+        if (dBtn) {
+          dBtn.addEventListener('click', () => {
+            document.getElementById('depositModalOverlay').style.display = 'flex';
+            setTimeout(() => document.querySelector('.dash-modal').classList.add('open'), 10);
+          });
+        }
+        
+        // Bind Logout
+        const lBtn = document.getElementById('logoutBtn');
+        if (lBtn) {
+          lBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('isLoggedIn');
+            renderNav();
+          });
+        }
+      } else {
+        authContainer.appendChild(document.getElementById('tmplLoggedOut').content.cloneNode(true));
+        
+        // Bind Sign In
+        const sBtn = document.getElementById('btnGoogleSignIn');
+        if (sBtn) {
+          sBtn.addEventListener('click', () => {
+            // Mock Google Sign-In -> Immediately authenticates
+            localStorage.setItem('isLoggedIn', 'true');
+            renderNav();
+          });
+        }
+      }
+    }
+    
+    renderNav();
+
   </script>
 </body>
 </html>

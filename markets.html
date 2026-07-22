@@ -366,12 +366,11 @@ function renderMarkets(markets) {
       </button>
 
       <!-- AI Analyse -->
-      <button class="btn-outline" style="width:100%;margin-top:0.6rem;"
-        onclick="analyseMatch('${m.matchId}','${m.id}')">
-        🤖 AI Analyse — 0.10 USDC
-      </button>
+      <a href="analysis.html?matchId=${m.matchId}&home=${m.homeTeam.split(' ')[0]}&away=${m.awayTeam.split(' ')[0]}" class="btn-outline" style="width:100%; margin-top:0.6rem; display:block; text-align:center; text-decoration:none;">
+        💬 Analyse Match
+      </a>
 
-      <!-- Analysis panel (hidden until analysis is done) -->
+      <!-- Analysis panel (removed) -->
       <div class="analysis-panel" id="ap_${m.id}"></div>
     </div>`;
   }).join('');
@@ -408,55 +407,7 @@ window.placeBet = async function(marketId, home, away) {
   setTimeout(() => showToast('✅ Bet placed on Injective! Tx confirmed.'), 2000);
 };
 
-// ── AI Analysis (x402 protected) ──────────────────────────────────────────────
-window.analyseMatch = async function(matchId, marketId) {
-  const panel = document.getElementById('ap_' + marketId);
-  panel.classList.add('visible');
-  panel.innerHTML = `<div style="display:flex;align-items:center;gap:0.75rem;color:var(--text-muted);font-size:0.85rem;">
-    <span class="spinner"></span> Requesting analysis… (x402 payment flow)
-  </div>`;
-
-  try {
-    const result = await apiPost('/api/analyse', { matchId });
-    renderAnalysis(panel, result.analysis);
-  } catch (err) {
-    panel.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;">
-      ❌ ${err.message || 'Analysis failed. Is the server running?'}
-    </div>`;
-  }
-};
-
-function renderAnalysis(panel, a) {
-  if (!a) { panel.innerHTML = '<div style="color:var(--text-muted);">No analysis returned.</div>'; return; }
-
-  const confidence = a.prediction?.confidence || 60;
-  const winner     = a.prediction?.winner || '—';
-  const score      = a.prediction?.score  || '—';
-
-  panel.innerHTML = `
-    <div class="analysis-header">🤖 AI Analysis <span style="opacity:.5;font-weight:400;margin-left:0.5rem;">MCP Agent Skills + Injective Market Data</span></div>
-    <div class="analysis-prediction">
-      <div class="pred-winner">${winner}</div>
-      <div class="pred-score">${score}</div>
-      <div class="confidence-pill">${confidence}% confidence</div>
-    </div>
-    <div class="stat-bar-wrap">
-      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${confidence}%"></div></div>
-    </div>
-    <div class="analysis-summary" style="margin-top:0.85rem;">${a.summary || ''}</div>
-    ${a.keyFactors?.length ? `
-    <ul class="factor-list" style="margin-top:0.75rem;">
-      ${a.keyFactors.map(f => `<li class="factor-item">${f}</li>`).join('')}
-    </ul>` : ''}
-    ${a.marketInsight ? `
-    <div style="margin-top:0.75rem;padding:0.75rem;border-radius:10px;background:rgba(0,198,198,0.05);border:1px solid rgba(0,198,198,0.12);font-size:0.8rem;color:var(--text-muted);">
-      <strong style="color:var(--accent);">📊 Market Insight</strong><br/>${a.marketInsight}
-    </div>` : ''}
-    <div style="margin-top:0.75rem;font-size:0.7rem;color:rgba(255,255,255,0.3);">
-      Risk: ${a.riskLevel || '—'} · Paid via x402 on Injective · Data from MCP tools
-    </div>
-  `;
-}
+// AI Analysis moved to analysis.html (Chat UI)
 
 // ── CCTP Deposit flow ─────────────────────────────────────────────────────────
 document.getElementById('depositBtn').addEventListener('click', () => {

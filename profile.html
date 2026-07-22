@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match Intelligence — Ningue</title>
+  <meta name="description" content="World Cup match intelligence powered by Ningue on Injective Protocol. AI-powered match analysis via MCP Agent Skills." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="shared.css?v=5" />
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/logo_ningue_transparent.png" alt="Ningue Logo" style="height:44px;" />
+        <span>Nin<span class="accent">gue</span></span>
+      </a>
+      <button class="mobile-menu-close" id="menuCloseBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="sidebar-content">
+      
+      <!-- PORTFOLIO WIDGET -->
+      <div class="sidebar-widget">
+        <div class="sw-label">Portfolio <span class="sw-sub">(Last 24h)</span></div>
+        <div class="sw-val">$0.0</div>
+        <div class="sw-change">$0.0 (0.0%)</div>
+      </div>
+
+      <!-- BOX 2: Navigation Card -->
+      <div class="sidebar-card">
+        <!-- LIVE MATCHES PILL -->
+        <a href="livescores.html" class="sidebar-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Live Matches
+        </a>
+
+        <!-- DIVIDER -->
+        <div class="sidebar-divider"></div>
+
+        <!-- FOOTBALL SECTION -->
+        <div class="sidebar-section">
+          <div class="ss-header ss-toggle">
+            <span>Football</span>
+            <svg class="ss-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="ss-links">
+            <a href="markets.html" class="ss-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Live & Upcoming
+            </a>
+            <a href="#" class="ss-link">
+              <svg class="ss-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 808 1233" fill="none">
+                <path d="M0 201.879C0 89.8993 93.8438 0 198.725 0H610.371C697.904 0 807.518 71.7613 807.518 199.513C807.518 328.877 703.005 401.097 613.65 404.426C647.396 403.968 754.557 404.303 807.517 404.547V604.849H0.788591V391.929C0.788591 332.785 58.3557 201.879 197.936 201.879H0Z" fill="currentColor"/>
+                <path d="M608.795 627.335C713.676 627.335 807.52 717.234 807.52 829.214H609.583C734.968 829.214 807.52 939.617 807.52 1029.52C807.52 1131.24 726.293 1232.18 614.313 1232.18H205.035C55.2026 1232.18 0.00238037 1098.91 0.00238037 1046.08L0.0020752 1025.79C0.00170898 999.669 0.00134277 972.247 0.00134277 826.848C0.00134277 699.096 109.615 627.335 197.149 627.335H608.795Z" fill="currentColor"/>
+              </svg> World Cup'26
+            </a>
+            <a href="#" class="ss-link"><img src="assets/spl_logo_processed.png" class="ss-icon" /> SPL</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/MLS%20Inactive%201_128x128.png" class="ss-icon" /> MLS</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/League_Logos_3X/EPL_Inactive_48x48.png" class="ss-icon" /> EPL</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/League_Logos_3X/LaLiga_Inactive_128x128.png" class="ss-icon" /> La Liga</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/Series%20A%20Inactive_128x128.png" class="ss-icon" /> Serie A</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/League_Logos_3X/UCL_Inactive_128x128.png" class="ss-icon" /> UCL</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/Bundesliga%20inactive_128x128.png" class="ss-icon" /> Bundesliga</a>
+            <a href="#" class="ss-link"><img src="https://public-assets.pred.app/market-assets/League_Logos/Ligue1%20inactive_128x128.png" class="ss-icon" /> Ligue 1</a>
+          </div>
+        </div>
+
+        <!-- GAMES SECTION -->
+        <div class="sidebar-section ss-disabled ss-tooltip-wrap">
+          <div class="ss-header">Games</div>
+          <div class="ss-tooltip">Coming soon</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <button class="mobile-menu-open" id="menuOpenBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <a href="index.html" class="nav-brand mobile-only">
+      <img src="assets/logo_ningue_transparent.png" alt="Ningue Logo" style="height:36px;" />
+      <span>Nin<span class="accent">gue</span></span>
+    </a>
+  </div>
+    <div class="nav-right" id="navAuthContainer">
+      <!-- Auth content injected via JS -->
+    </div>
+
+    <!-- Template: Logged Out -->
+    <template id="tmplLoggedOut">
+      <button class="btn-signin" id="btnGoogleSignIn" style="background: white; color: #000; display: flex; align-items: center; gap: 0.5rem; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 600; cursor: pointer; border: none; font-size: 0.9rem;">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+        Sign in
+      </button>
+    </template>
+
+    <!-- Template: Logged In -->
+    <template id="tmplLoggedIn">
+      <button class="btn-deposit" id="depositBtn">Bridge</button>
+      <div class="interest-badge" title="Requires $10,000+ balance to unlock 6% Yield">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        6% Interest
+      </div>
+      <div class="nav-gift-icon" title="Rewards coming soon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>
+      </div>
+      <div class="nav-avatar-wrapper" style="position: relative;">
+        <div class="nav-avatar" id="avatarMenuBtn" style="cursor: pointer;">
+          <img src="assets/ninja_avatar.png" alt="Profile" />
+        </div>
+        <!-- Profile Dropdown -->
+        <div class="avatar-dropdown" id="avatarDropdown">
+          <div class="dropdown-header">
+            <img src="assets/ninja_avatar.png" alt="Profile" class="dropdown-avatar" />
+            <div class="dropdown-info">
+              <div class="dropdown-primary-address">0x00D...c543</div>
+              <div class="dropdown-secondary-address">0x6939...eFFb <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+            </div>
+          </div>
+          <div class="dropdown-links">
+            <a href="profile.html">View profile</a>
+            <a href="#" id="logoutBtn" style="color: #ff5252;">Log out</a>
+          </div>
+        </div>
+      </div>
+    </template>
+  </nav>
+
+<!-- PAGE -->
+<div class="page profile-page" style="padding-top: 4rem;">
+  <div class="container" style="max-width: 900px; display: none;" id="authContent">
+    <!-- Top Cards Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+      
+      <!-- Profile Card -->
+      <div class="dash-card" style="display: flex; flex-direction: column; position: relative; padding: 2rem;">
+        <div style="position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; color: var(--text-muted); align-items: center; background: rgba(255,255,255,0.03); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem;">
+          0x693...eFFb
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor: pointer;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor: pointer; margin-left: 0.2rem;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        </div>
+        <img src="assets/ninja_avatar.png" style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--accent); margin-bottom: 1.5rem;" />
+        <h2 style="font-size: 1.8rem; margin: 0 0 0.2rem 0; font-family: monospace; letter-spacing: -0.5px;">0x00D...c543</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">Joined Jul 2026</p>
+      </div>
+
+      <!-- PnL Card -->
+      <div class="dash-card" style="position: relative; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h3 style="color: var(--text-muted); font-size: 0.9rem; margin: 0 0 0.5rem 0; font-weight: 600;">PnL</h3>
+            <div style="font-size: 2rem; font-weight: 800; margin: 0;">$0.0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">All Time</div>
+          </div>
+          <div style="display: flex; gap: 0.8rem; font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">
+            <span style="cursor: pointer; transition: color 0.2s;">1D</span>
+            <span style="cursor: pointer; transition: color 0.2s;">1W</span>
+            <span style="cursor: pointer; transition: color 0.2s;">1M</span>
+            <span style="cursor: pointer; transition: color 0.2s;">1Y</span>
+            <span style="color: var(--text); background: rgba(255,255,255,0.1); padding: 0.1rem 0.4rem; border-radius: 4px; cursor: pointer;">All</span>
+          </div>
+        </div>
+        <div style="height: 120px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.9rem;">
+          PnL graph coming soon
+        </div>
+      </div>
+    </div>
+
+    <!-- Complete Profile Block -->
+    <div class="dash-card" style="padding: 2rem;">
+      <h3 style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin: 0 0 2rem 0; letter-spacing: 1px; font-weight: 700;">Complete Profile</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem;">
+        <!-- Connect Wallet -->
+        <div>
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 600;">1. Connect your wallet</h4>
+          <button class="btn-deposit" style="margin-top: 1.2rem; background: #E1F21E; color: #121215; border: none; padding: 0.6rem 1.2rem; font-weight: 700; cursor: pointer; border-radius: 8px;">Connect Wallet</button>
+        </div>
+        
+        <!-- Choose Nickname -->
+        <div>
+          <h4 style="margin: 0 0 0.2rem 0; font-size: 1.05rem; font-weight: 600;">2. Choose a nickname</h4>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 1.2rem 0;">This will how others will see you on Ningue.</p>
+          <div style="display: flex; gap: 0.5rem;">
+            <div style="position: relative; flex: 1;">
+              <input type="text" placeholder="Enter username" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; color: white; outline: none; font-size: 0.9rem;" />
+              <button style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg> Connect To Fill</button>
+            </div>
+            <button style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); border-radius: 8px; padding: 0 1.5rem; cursor: not-allowed; font-weight: 600; font-size: 0.9rem;">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="unauthContent" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 1rem;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Sign In Required</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">Please sign in to view your profile.</p>
+  </div>
+</div>
+
+<script type="module">
+import { startBackground, initNav } from './shared.js';
+
+startBackground();
+initNav();
+
+// ── Auth Logic ──────────────────────────────────────────────────────────
+function renderNav() {
+  const authContainer = document.getElementById('navAuthContainer');
+  const authContent = document.getElementById('authContent');
+  const unauthContent = document.getElementById('unauthContent');
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  
+  authContainer.innerHTML = '';
+  if (isLoggedIn) {
+    authContainer.appendChild(document.getElementById('tmplLoggedIn').content.cloneNode(true));
+    authContent.style.display = 'block';
+    unauthContent.style.display = 'none';
+    
+    // Bind Bridge Modal
+    const dBtn = document.getElementById('depositBtn');
+    if (dBtn) {
+      dBtn.addEventListener('click', () => {
+        // Assume Bridge modal is injected or linked, for now just show alert if missing
+        alert('Bridge modal opens here (defined in index)');
+      });
+    }
+    
+    // Bind Logout
+    const lBtn = document.getElementById('logoutBtn');
+    if (lBtn) {
+      lBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('isLoggedIn');
+        renderNav();
+      });
+    }
+  } else {
+    authContainer.appendChild(document.getElementById('tmplLoggedOut').content.cloneNode(true));
+    authContent.style.display = 'none';
+    unauthContent.style.display = 'flex';
+    
+    // Bind Sign In
+    const sBtn = document.getElementById('btnGoogleSignIn');
+    if (sBtn) {
+      sBtn.addEventListener('click', () => {
+        // Mock Google Sign-In -> Immediately authenticates
+        localStorage.setItem('isLoggedIn', 'true');
+        renderNav();
+      });
+    }
+  }
+}
+
+renderNav();
+
+</script>
+</body>
+</html>

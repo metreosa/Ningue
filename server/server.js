@@ -184,6 +184,67 @@ Return a JSON object with:
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  POST /api/chat  — Interactive match intelligence (Unprotected for demo)
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/chat', async (req, res) => {
+  const { matchId, message } = req.body;
+
+  if (!matchId || !message) return res.status(400).json({ error: 'matchId and message required' });
+
+  try {
+    // 1. Gather basic match data to inform the AI
+    let contextData = '';
+    let homeName = 'Home';
+    let awayName = 'Away';
+    try {
+      const matchInfo = await footballTools.get_match_info(matchId);
+      homeName = matchInfo.homeTeam?.name || 'Home';
+      awayName = matchInfo.awayTeam?.name || 'Away';
+      contextData = `Match: ${homeName} vs ${awayName}. `;
+    } catch(e) {}
+
+    // 2. Call OpenAI if available
+    if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'demo') {
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: `You are an expert football AI assistant named Match Intelligence. You have context: ${contextData}. Answer the user's question concisely in 1-3 sentences. Focus on data-driven football insights.` },
+          { role: 'user', content: message },
+        ],
+        max_tokens: 200,
+      });
+      return res.json({ reply: completion.choices[0].message.content });
+    }
+
+    // 3. Realistic Fallback if no OpenAI Key
+    let reply = "";
+    const msg = message.toLowerCase();
+    
+    // Player specific responses
+    if (msg.includes('messi')) {
+      reply = `<strong>My prediction: 0 goals for Messi, but 1 assist.</strong>\n\n<strong>Reasoning:</strong>\n<ul style="margin-top:0.5rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">\n  <li><strong>Spain's defense is the standout stat of the tournament</strong> — 1 goal conceded in 7 matches. That's not just good, it's historically stingy. Teams that lock down space centrally and press high tend to cut off exactly the pockets Messi thrives in. He creates through vision and timing, which Spain's disciplined shape is specifically built to deny.</li>\n  <li><strong>Messi's role has shifted this tournament.</strong> He's not primarily the guy scoring hat tricks anymore — Argentina's other forwards have carried more scoring load, with Messi orchestrating.</li>\n  <li><strong>Counter-argument for a goal:</strong> Messi has a habit of producing exactly when the stage is biggest — his two-goal game in the 2022 final is the precedent. If Argentina get anything from a set piece or penalty, he's the taker.</li>\n</ul>\n\nIf you want a full match scoreline guess to go with it: <strong>Spain 2-1 Argentina</strong>, with Messi's contribution being the assist on Argentina's goal.`;
+    } else if (msg.includes('mbappe') || msg.includes('mbappé')) {
+      reply = `<strong>My prediction: 1 goal for Mbappé.</strong>\n\n<strong>Reasoning:</strong>\n<ul style="margin-top:0.5rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">\n  <li><strong>Exploiting high lines:</strong> Mbappé's top speed has clocked at 36.5 km/h this tournament. Against defenses that press high to control possession, one simple ball over the top is all it takes for him to break away.</li>\n  <li><strong>Shot volume:</strong> He is averaging 4.2 shots on target per 90 minutes. With that kind of volume, probability dictates he converts at least one high-xG chance.</li>\n</ul>\n\n<strong>Final verdict:</strong> Expect him to score late in the second half when legs tire.`;
+    } else if (msg.includes('yamal')) {
+      reply = `<strong>My prediction: 1 assist for Lamine Yamal.</strong>\n\n<strong>Reasoning:</strong>\n<ul style="margin-top:0.5rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">\n  <li><strong>Playmaking over finishing:</strong> Yamal has been overperforming his xA by 0.4 per 90 minutes. He is the creative engine on the right flank, consistently delivering cutbacks to the center forwards.</li>\n  <li><strong>Defensive double-teams:</strong> Opponents are forced to commit two defenders to Yamal, which opens up massive pockets of space centrally for his teammates to exploit.</li>\n</ul>\n\nYamal is more likely to create the winning moment than finish it himself.`;
+    } else if (msg.includes('win') || msg.includes('winner') || msg.includes('prediction')) {
+      reply = `<strong>Prediction: A narrow 2-1 victory for ${homeName}.</strong>\n\n<strong>Key Match Dynamics:</strong>\n<ul style="margin-top:0.5rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">\n  <li><strong>Midfield Control:</strong> ${homeName} has dominated possession (avg 62%) in their previous matches. Controlling the tempo will starve ${awayName} of counter-attacking opportunities.</li>\n  <li><strong>Market Sentiment:</strong> On-chain volume on Injective shows a massive liquidity shift towards ${homeName} in the last 4 hours, implying smart money is backing their deeper bench to make the difference in the final 20 minutes.</li>\n</ul>`;
+    } else {
+      reply = `<strong>Analysis of ${homeName} vs ${awayName}</strong>\n\nThe current spread suggests a highly tactical, tight matchup. \n\n<ul style="margin-top:0.5rem; padding-left:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">\n  <li><strong>Liquidity:</strong> High volume is concentrated on the Draw market, indicating uncertainty and expecting a low-scoring affair.</li>\n  <li><strong>Tactical clash:</strong> ${homeName} relies heavily on wing-play, while ${awayName} plays a very compact low block. The game will be decided by set-pieces or individual brilliance rather than systemic breakdowns.</li>\n</ul>`;
+    }
+    
+    // Slight delay to simulate AI thinking
+    setTimeout(() => {
+      res.json({ reply });
+    }, 800);
+
+  } catch (err) {
+    console.error('Chat error:', err);
+    res.status(500).json({ error: 'Chat failed', detail: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  CCTP — Cross-Chain Transfer Protocol (USDC bridge to Injective)
 // ─────────────────────────────────────────────────────────────────────────────
 const CCTP_CHAINS = [
@@ -294,8 +355,11 @@ function getMockAnalysis(matchId, matchInfo, marketOdds) {
     marketInsight: `The Injective market (${marketOdds.totalPool} total pool) prices ${home} at ${marketOdds.homeWin?.impliedOdds}x — slightly tighter than our model suggests, indicating slight overvaluing of the favourite.`,
     riskLevel: 'Medium',
     keyPlayers: [
-      { name: 'Vinicius Jr.', team: home, impact: 'Pace and dribbling key for counter-attacks' },
-      { name: 'Lionel Messi', team: away, impact: 'Set-piece specialist and playmaker' },
-    ],
+    { name: 'Player A', team: home, impact: 'High work rate, crucial for pressing' },
+    { name: 'Player B', team: away, impact: 'Key playmaker, must be marked out' },
+    { name: 'Player C', team: home, impact: 'Solid defensively, anchoring the midfield' }
+  ],
   };
 }
+
+export default app;

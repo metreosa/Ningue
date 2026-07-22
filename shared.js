@@ -7,7 +7,8 @@
 //   - Nav active link
 // ─────────────────────────────────────────────────────────────────────────────
 
-const API = 'http://localhost:3001';
+// If running locally on separate ports, use localhost:3001. If deployed, use relative path.
+const API = window.location.hostname === 'localhost' ? 'http://localhost:3001' : '';
 
 // ── Toast ────────────────────────────────────────────────────────────────────
 export function showToast(msg, duration = 3000) {
